@@ -1,7 +1,8 @@
 # Otras librerías de Puerto Rico, para que el lector pueda encargar la
 # novela en la que le quede cerca. Se muestran agrupadas por municipio.
 # Para añadir una, copia un bloque. "telefono", "correo" y "enlace" son
-# opcionales, pero conviene poner al menos uno.
+# opcionales, pero conviene poner al menos uno. En "enlace" vale la página
+# web o, si no tiene, su Facebook o Instagram.
 
 titulo: Pídela en tu librería
 texto: >-
@@ -44,7 +45,7 @@ lista:
     municipio: San Juan
     telefono:
     correo: libreria.laesquinita@gmail.com
-    enlace:
+    enlace: https://www.facebook.com/librerialaesquinita/
   - nombre: "The Bookmark (San Patricio)"
     municipio: Guaynabo
     telefono: 787-710-7848
@@ -89,7 +90,7 @@ lista:
     municipio: Mayagüez
     telefono: 787-833-6041
     correo: 
-    enlace: 
+    enlace: https://www.facebook.com/p/Libreria-Universal-Inc-100057694110243/
   - nombre: "Librería Colegial (RUM)"
     municipio: Mayagüez
     telefono: 787-265-3885

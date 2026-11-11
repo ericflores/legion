@@ -177,7 +177,7 @@ content:
           - { name: municipio, label: Municipio, type: string, required: true }
           - { name: telefono, label: Teléfono, type: string, description: 'Con guiones: 787-555-1234' }
           - { name: correo, label: Correo electrónico, type: string }
-          - { name: enlace, label: Página web o red social, type: string }
+          - { name: enlace, label: Página web (o Facebook o Instagram si no tiene), type: string }
 
   - name: encuentros
     label: Encuentros

@@ -13,6 +13,14 @@ const municipios = [...new Set(directorio.lista.map((l) => l.municipio))].sort(e
   librerias: directorio.lista.filter((l) => l.municipio === municipio).sort((a, b) => es.compare(a.nombre, b.nombre)),
 }));
 
+// El enlace se rotula según adónde lleva.
+const rotulo = (url: string) => {
+  const sitio = new URL(url).hostname;
+  if (sitio.includes('facebook.')) return 'Facebook';
+  if (sitio.includes('instagram.')) return 'Instagram';
+  return 'Sitio';
+};
+
 // El correo se abre ya redactado, con los datos del libro.
 const pedido = (correo: string) =>
   `mailto:${correo}?subject=${encodeURIComponent(directorio.asunto)}&body=${encodeURIComponent(directorio.mensaje)}`;
@@ -78,7 +86,7 @@ const pedido = (correo: string) =>
                       )}
                       {l.enlace && (
                         <EnlaceExterno href={l.enlace} class="">
-                          Sitio<span class="solo-lectores"> de {l.nombre}</span>
+                          {rotulo(l.enlace)}<span class="solo-lectores"> de {l.nombre}</span>
                         </EnlaceExterno>
                       )}
                     </span>
