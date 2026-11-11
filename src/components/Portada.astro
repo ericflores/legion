@@ -10,6 +10,8 @@ interface Props {
 }
 const { sitio } = Astro.props;
 const portada = imagen(sitio.portada);
+// Tamaños a servir: nunca más anchos que la imagen original.
+const anchos = portada ? [...[360, 540, 720, 1080].filter((a) => a < portada.width), portada.width] : [];
 ---
 
 <section class="portada" id="inicio" aria-labelledby="titulo-sitio">
@@ -43,8 +45,8 @@ const portada = imagen(sitio.portada);
           <Image
             src={portada}
             alt={sitio.portada_descripcion}
-            widths={[480, 800, 1132]}
-            sizes="(min-width: 60rem) 46vw, 92vw"
+            widths={anchos}
+            sizes="(min-width: 30rem) 27rem, 80vw"
             loading="eager"
             fetchpriority="high"
           />
@@ -123,7 +125,7 @@ const portada = imagen(sitio.portada);
   .portada__imagen {
     position: relative;
     justify-self: center;
-    width: min(100%, 38rem);
+    width: min(80%, 27rem);
   }
 
   /* halo cálido detrás del libro */
@@ -137,7 +139,10 @@ const portada = imagen(sitio.portada);
 
   .portada__imagen img {
     width: 100%;
-    filter: drop-shadow(0 2rem 3rem rgb(0 0 0 / 0.55));
+    border-radius: var(--radio);
+    box-shadow:
+      0 0 0 1px var(--linea),
+      0 2rem 3.5rem rgb(0 0 0 / 0.6);
   }
 
   @media (min-width: 60rem) {

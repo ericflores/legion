@@ -1,7 +1,7 @@
 ---
 etiqueta: El autor
 nombre: Efraín Alberto Flores Acosta
-foto: autor.svg
+foto: autor.webp
 foto_descripcion: Retrato de Efraín Alberto Flores Acosta
 proyectos_titulo: Futuros proyectos
 proyectos_texto: >-

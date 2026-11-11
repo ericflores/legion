@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 1920" width="1280" height="1920">
-  <rect width="1280" height="1920" fill="#1f1e22"/>
-  <circle cx="640" cy="760" r="210" fill="#2e2c31"/>
-  <path d="M220 1500c0-250 190-420 420-420s420 170 420 420v420H220z" fill="#2e2c31"/>
-  <text x="640" y="1700" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="56" font-style="italic" fill="#cbb68f" opacity=".8">Foto provisional del autor</text>
-</svg>

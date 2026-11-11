@@ -13,8 +13,10 @@ gancho:
 frase: Una verdad más perturbadora que la mentira.
 
 # Imagen de la portada (el archivo vive en contenido/imagenes/)
-portada: portada.svg
-portada_descripcion: Portada y contraportada de Legión, de Efraín A. Flores Acosta
+portada: portada.webp
+portada_descripcion: >-
+  Portada de Legión: un hombre de traje, cabizbajo y de espaldas, del que se
+  desprende un rostro hecho de humo.
 
 # Texto que muestran Google y las redes sociales al compartir el enlace
 descripcion_buscadores: >-
