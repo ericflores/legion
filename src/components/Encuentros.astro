@@ -20,15 +20,32 @@ const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: ZONA }).format(new Date
 const parte = (f: Date, opciones: Intl.DateTimeFormatOptions) =>
   new Intl.DateTimeFormat('es-PR', { timeZone: 'UTC', ...opciones }).format(f);
 
+// Cada tarjeta se muestra entre "visible_desde" y "visible_hasta". Si no se
+// indican, se ve desde que se publica hasta el día del encuentro.
+const periodo = (d: { fecha: Date; visible_desde?: Date; visible_hasta?: Date }) => ({
+  desde: d.visible_desde ? diaISO(d.visible_desde) : '',
+  hasta: diaISO(d.visible_hasta ?? d.fecha),
+});
+// Margen de dos días: una tarjeta que empieza a verse mañana ya va en la
+// página, oculta, y aparece sola a medianoche sin esperar a la publicación diaria.
+const pronto = new Intl.DateTimeFormat('en-CA', { timeZone: ZONA }).format(Date.now() + 2 * 86_400_000);
+
 const proximos = (await getCollection('encuentros'))
-  .filter((e) => diaISO(e.data.fecha) >= hoy)
+  .filter((e) => {
+    const { desde, hasta } = periodo(e.data);
+    return hasta >= hoy && desde <= pronto;
+  })
   .sort((a, b) => a.data.fecha.getTime() - b.data.fecha.getTime());
 
 const eventos = await Promise.all(
   proximos.map(async (e) => {
     const { fecha, lugar, direccion, mapa } = e.data;
+    const { desde, hasta } = periodo(e.data);
     return {
       ...e.data,
+      desde,
+      hasta,
+      visible: desde <= hoy,
       iso: diaISO(fecha),
       dia: parte(fecha, { day: 'numeric' }),
       mes: parte(fecha, { month: 'short' }).replace('.', ''),
@@ -48,7 +65,7 @@ const eventos = await Promise.all(
   <ul class="eventos" role="list" data-eventos>
     {
       eventos.map((e) => (
-        <li class="evento" data-fecha={e.iso}>
+        <li class="evento" data-desde={e.desde} data-hasta={e.hasta} hidden={!e.visible}>
           <time class="evento__fecha" datetime={e.iso}>
             <span class="evento__dia" aria-hidden="true">
               {e.dia}
@@ -75,6 +92,7 @@ const eventos = await Promise.all(
             )}
             <div class="evento__acciones">
               <EnlaceExterno href={e.mapa}>Cómo llegar</EnlaceExterno>
+              {e.enlace && <EnlaceExterno href={e.enlace}>{e.enlace_texto ?? 'Más información'}</EnlaceExterno>}
               <a class="enlace" href={seccion('contacto')} data-motivo="Ventas y encuentros">
                 Pedir información
                 <Flecha tipo="abajo" />
@@ -85,24 +103,27 @@ const eventos = await Promise.all(
       ))
     }
   </ul>
-  <p class="eventos__vacio" data-sin-eventos hidden={eventos.length > 0}>
+  <p class="eventos__vacio" data-sin-eventos hidden={eventos.some((e) => e.visible)}>
     {sinFechas}{' '}
     <a href={seccion('contacto')} data-motivo="Invitar al autor">Invitar al autor</a>.
   </p>
 </Seccion>
 
 <script>
-  // El sitio es estático: si pasa la fecha de un encuentro y nadie ha vuelto a
-  // publicar, se oculta aquí para no anunciar algo que ya ocurrió.
+  // El sitio es estático y se vuelve a publicar una vez al día. Entre una
+  // publicación y otra, aquí se muestra cada tarjeta solo dentro de su periodo
+  // de visibilidad, según la fecha de hoy en Puerto Rico.
   const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Puerto_Rico' }).format(new Date());
   const lista = document.querySelector<HTMLElement>('[data-eventos]');
   if (lista) {
-    const eventos = [...lista.querySelectorAll<HTMLElement>('[data-fecha]')];
-    for (const e of eventos) e.hidden = (e.dataset.fecha ?? '') < hoy;
-    if (eventos.every((e) => e.hidden)) {
-      lista.hidden = true;
-      document.querySelector<HTMLElement>('[data-sin-eventos]')?.removeAttribute('hidden');
+    const eventos = [...lista.querySelectorAll<HTMLElement>('[data-hasta]')];
+    for (const e of eventos) {
+      e.hidden = (e.dataset.desde ?? '') > hoy || (e.dataset.hasta ?? '') < hoy;
     }
+    const ninguno = eventos.every((e) => e.hidden);
+    lista.hidden = ninguno;
+    const vacio = document.querySelector<HTMLElement>('[data-sin-eventos]');
+    if (vacio) vacio.hidden = !ninguno;
   }
 </script>
 

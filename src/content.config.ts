@@ -142,6 +142,13 @@ const encuentros = defineCollection({
     lugar: texto,
     direccion: opcional(texto),
     mapa: opcional(enlace),
+    // Enlace opcional con más información (una página del evento, por ejemplo)
+    enlace: opcional(enlace),
+    enlace_texto: opcional(texto),
+    // Periodo en que la tarjeta se muestra. Vacíos: desde ya y hasta el día
+    // del encuentro.
+    visible_desde: opcional(z.coerce.date()),
+    visible_hasta: opcional(z.coerce.date()),
   }),
 });
 

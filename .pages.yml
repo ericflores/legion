@@ -159,6 +159,26 @@ content:
             type: string
             description: Si se deja vacío, se muestra "En tienda".
 
+  - name: directorio
+    label: Directorio de otras librerías
+    type: file
+    path: contenido/directorio.yaml
+    fields:
+      - { name: titulo, label: Título del bloque plegado, type: string, required: true }
+      - { name: texto, label: Texto de introducción, type: text }
+      - { name: asunto, label: Asunto del correo ya redactado, type: string, required: true }
+      - { name: mensaje, label: Texto del correo ya redactado, type: text, required: true }
+      - name: lista
+        label: Librerías
+        type: object
+        list: true
+        fields:
+          - { name: nombre, label: Nombre, type: string, required: true }
+          - { name: municipio, label: Municipio, type: string, required: true }
+          - { name: telefono, label: Teléfono, type: string, description: 'Con guiones: 787-555-1234' }
+          - { name: correo, label: Correo electrónico, type: string }
+          - { name: enlace, label: Página web o red social, type: string }
+
   - name: encuentros
     label: Encuentros
     type: collection
@@ -183,6 +203,19 @@ content:
         label: Enlace al mapa (opcional)
         type: string
         description: Si se deja vacío, el sitio crea solo un enlace a Google Maps con el lugar y la dirección.
+      - name: enlace
+        label: Enlace con más información (opcional)
+        type: string
+        description: Por ejemplo, la página del evento. Debe empezar con https://
+      - { name: enlace_texto, label: Texto de ese enlace, type: string, description: 'Si se deja vacío dice "Más información".' }
+      - name: visible_desde
+        label: Mostrar la tarjeta desde
+        type: date
+        description: Opcional. Antes de este día la tarjeta queda guardada pero no se ve. Vacío = se ve desde que se publica.
+      - name: visible_hasta
+        label: Mostrar la tarjeta hasta
+        type: date
+        description: Opcional. Después de este día la tarjeta se oculta sola. Vacío = hasta el día del encuentro.
       - { name: body, label: Detalles (opcional), type: rich-text, options: { format: markdown } }
 
   - name: autor

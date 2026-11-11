@@ -30,61 +30,31 @@ lista:
     telefono: 787-344-2964
     correo: maritzabooks@gmail.com
     enlace: https://www.msbookspr.com/
-  - nombre: "Librería Educativa (Río Piedras)"
+  - nombre: "Librería Mágica (Río Piedras)"
     municipio: San Juan
-    telefono: 787-766-1335
-    correo: 
-    enlace: https://laeducativapr.com/contacto.php
-  - nombre: "Librería Educativa (Cupey)"
+    telefono: 787-370-0355
+    correo: libreriamagicapr@gmail.com
+    enlace: 
+  - nombre: "La Esquina"
     municipio: San Juan
-    telefono: 787-720-1646
+    telefono: 787-368-5363
     correo: 
-    enlace: https://laeducativapr.com/contacto.php
+    enlace: 
   - nombre: "The Bookmark (San Patricio)"
     municipio: Guaynabo
     telefono: 787-710-7848
     correo: bookmark@thebookmarkpr.com
     enlace: https://thebookmarkpr.com/pages/san-patricio-liberty-square
-  - nombre: "Librería Educativa"
-    municipio: Carolina
-    telefono: 787-979-3304
-    correo: 
-    enlace: https://laeducativapr.com/contacto.php
-  - nombre: "Librería Contemporánea"
-    municipio: Carolina
-    telefono: 787-257-2450
-    correo: info@libreriapr.com
-    enlace: https://libreriapr.com/contactenos/
   - nombre: "Santuario: Libros y Discos"
     municipio: Bayamón
     telefono: 
     correo: santuariolibrosdiscos@gmail.com
     enlace: https://elsantuariopr.com/
-  - nombre: "Librería Educativa"
-    municipio: Bayamón
-    telefono: 787-979-9054
-    correo: 
-    enlace: https://laeducativapr.com/contacto.php
-  - nombre: "Librería Contemporánea"
-    municipio: Bayamón
-    telefono: 787-288-3448
-    correo: bayamon@libreriapr.com
-    enlace: https://libreriapr.com/contactenos/
-  - nombre: "Librería Betances"
-    municipio: Bayamón
-    telefono: 787-786-4212
-    correo: libreria@betancespse.com
-    enlace: https://www.libreriabetances.com/
   - nombre: "Apostrophe Bookstore"
     municipio: Vega Baja
     telefono: 939-521-8002
     correo: ventas@apostrophebookstore.com
     enlace: https://apostrophebookstore.com/
-  - nombre: "Librería Educativa"
-    municipio: Arecibo
-    telefono: 787-817-2563
-    correo: 
-    enlace: https://laeducativapr.com/contacto.php
   - nombre: "The Bookmark (Plaza del Norte)"
     municipio: Hatillo
     telefono: 787-544-0214
@@ -100,34 +70,24 @@ lista:
     telefono: 787-242-6693
     correo: candilpr2013@gmail.com
     enlace: https://libreriaelcandil.com/
-  - nombre: "Librería Educativa"
-    municipio: Ponce
-    telefono: 787-284-2443
+  - nombre: "Librería Norberto González (UPR Cayey)"
+    municipio: Cayey
+    telefono: 787-263-5266
     correo: 
-    enlace: https://laeducativapr.com/contacto.php
-  - nombre: "Librería Pionera (PUCPR)"
-    municipio: Ponce
-    telefono: 
+    enlace: 
+  - nombre: "Librería Camar"
+    municipio: Humacao
+    telefono: 787-850-5680
     correo: 
-    enlace: https://www.pucpr.edu/conocenos/servicios-a-la-comunidad/libreria-pionera/
-  - nombre: "Librería Educativa"
-    municipio: Caguas
-    telefono: 939-633-6057
-    correo: 
-    enlace: https://laeducativapr.com/contacto.php
-  - nombre: "Librería Contemporánea"
-    municipio: Caguas
-    telefono: 787-703-0201
-    correo: info@libreriapr.com
-    enlace: https://libreriapr.com/contactenos/
-  - nombre: "Librería Educativa"
+    enlace: https://www.facebook.com/libreriacamar
+  - nombre: "Librería Universal"
     municipio: Mayagüez
-    telefono: 787-265-4102
+    telefono: 787-833-6041
     correo: 
-    enlace: https://laeducativapr.com/contacto.php
+    enlace: 
   - nombre: "Mikaela's BookCafé (Mayagüez Mall)"
     municipio: Mayagüez
-    telefono: 
+    telefono: 939-287-6261
     correo: 
     enlace: https://mayaguezmall.com/tiendas/book-cafe/
   - nombre: "Librería EDALS"

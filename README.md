@@ -18,7 +18,8 @@ Cada cambio guardado se publica solo en uno o dos minutos.
 | Ambientación y temas                         | `contenido/universo.md`              |
 | Un personaje                                 | `contenido/personajes/` (uno por archivo) |
 | Las canciones de la banda sonora             | `contenido/canciones.yaml`           |
-| Las librerías donde se vende                 | `contenido/librerias.yaml`           |
+| Las librerías que tienen la novela           | `contenido/librerias.yaml`           |
+| El directorio de otras librerías, por municipio | `contenido/directorio.yaml`       |
 | Una venta o presentación                     | `contenido/encuentros/` (una por archivo) |
 | La biografía y los futuros proyectos         | `contenido/autor.md`                 |
 | La portada o la foto del autor               | `contenido/imagenes/`                |
@@ -34,7 +35,11 @@ Hay dos maneras de editar:
 
 ### Anunciar un encuentro
 
-En `contenido/encuentros/`, crea un archivo como `2027-03-14-san-juan.md`
+Cada encuentro es una tarjeta. Se pueden dejar preparadas muchas a la vez:
+el sitio muestra solo las que están dentro de su periodo de visibilidad.
+
+En el editor visual: **Encuentros → Add an entry**. A mano: en
+`contenido/encuentros/`, crea un archivo como `2027-03-14-san-juan.md`
 copiando el que ya existe:
 
 ```md
@@ -45,17 +50,29 @@ hora: Desde las 10:00 a. m.
 lugar: Nombre del lugar
 direccion: Calle, pueblo, Puerto Rico
 mapa:
+enlace:
+enlace_texto:
+visible_desde: 2027-02-15
+visible_hasta:
 ---
 
 Aquí puede ir un párrafo opcional con más detalles.
 ```
 
-- La fecha siempre va como `año-mes-día`.
+- Las fechas siempre van como `año-mes-día`.
+- **`visible_desde`**: antes de ese día la tarjeta está guardada pero no se
+  ve. Vacío: se ve desde que se publica.
+- **`visible_hasta`**: después de ese día se oculta sola. Vacío: se ve hasta
+  el día del encuentro (`fecha`).
 - El enlace **Cómo llegar** se crea solo a partir del lugar y la dirección.
   Si quieres uno distinto, pégalo en `mapa`.
-- Cuando pasa la fecha, el encuentro deja de mostrarse. No hay que borrarlo.
-- Si no queda ninguno, el sitio muestra el texto `sin_fechas` de
-  `contenido/sitio.yaml`.
+- `enlace` añade un enlace con más información; `enlace_texto` es lo que
+  dice (por omisión, "Más información").
+- No hay que borrar las tarjetas viejas. Si no queda ninguna visible, el
+  sitio muestra el texto `sin_fechas` de `contenido/sitio.yaml`.
+- El sitio se vuelve a publicar solo cada madrugada, y además la página
+  comprueba la fecha al abrirse, así que las tarjetas aparecen y
+  desaparecen el día exacto sin que nadie haga nada.
 
 ### Añadir una canción
 
