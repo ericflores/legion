@@ -86,6 +86,27 @@ const librerias = defineCollection({
   }),
 });
 
+const directorio = defineCollection({
+  loader: unArchivo('directorio.yaml'),
+  schema: z.object({
+    titulo: texto,
+    texto: opcional(texto),
+    asunto: texto,
+    mensaje: texto,
+    lista: z
+      .array(
+        z.object({
+          nombre: texto,
+          municipio: texto,
+          telefono: opcional(z.string().regex(/^\d{3}-\d{3}-\d{4}$/, 'El teléfono va así: 787-555-1234')),
+          correo: opcional(z.email()),
+          enlace: opcional(enlace),
+        }),
+      )
+      .default([]),
+  }),
+});
+
 const canciones = defineCollection({
   loader: unArchivo('canciones.yaml'),
   schema: z.object({
@@ -124,4 +145,4 @@ const encuentros = defineCollection({
   }),
 });
 
-export const collections = { sitio, novela, universo, autor, librerias, canciones, personajes, encuentros };
+export const collections = { sitio, novela, universo, autor, librerias, directorio, canciones, personajes, encuentros };

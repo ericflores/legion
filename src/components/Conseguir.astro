@@ -4,6 +4,18 @@ import EnlaceExterno from './EnlaceExterno.astro';
 import Seccion from './Seccion.astro';
 
 const { data } = await unico('librerias');
+const { data: directorio } = await unico('directorio');
+
+// Directorio agrupado por municipio, ambos en orden alfabético.
+const es = new Intl.Collator('es');
+const municipios = [...new Set(directorio.lista.map((l) => l.municipio))].sort(es.compare).map((municipio) => ({
+  municipio,
+  librerias: directorio.lista.filter((l) => l.municipio === municipio).sort((a, b) => es.compare(a.nombre, b.nombre)),
+}));
+
+// El correo se abre ya redactado, con los datos del libro.
+const pedido = (correo: string) =>
+  `mailto:${correo}?subject=${encodeURIComponent(directorio.asunto)}&body=${encodeURIComponent(directorio.mensaje)}`;
 ---
 
 <Seccion id="conseguir" etiqueta={data.etiqueta} titular={data.titular}>
@@ -33,6 +45,52 @@ const { data } = await unico('librerias');
     ¿No la encuentras cerca?{' '}
     <a href={seccion('contacto')} data-motivo="Conseguir un ejemplar">Pídesela al autor</a>.
   </p>
+
+  {
+    municipios.length > 0 && (
+      <details class="directorio">
+        <summary>
+          <span class="directorio__titulo">{directorio.titulo}</span>
+          <span class="directorio__cuenta">
+            {directorio.lista.length} librerías en {municipios.length} municipios
+          </span>
+        </summary>
+        <div class="directorio__cuerpo">
+          {directorio.texto && <p class="directorio__texto">{directorio.texto}</p>}
+          {municipios.map((m) => (
+            <section class="municipio">
+              <h4>{m.municipio}</h4>
+              <ul role="list">
+                {m.librerias.map((l) => (
+                  <li class="tienda">
+                    <span class="tienda__nombre">{l.nombre}</span>
+                    <span class="tienda__contacto">
+                      {l.telefono && (
+                        <a href={`tel:+1${l.telefono.replaceAll('-', '')}`}>
+                          <span class="solo-lectores">Llamar a {l.nombre}: </span>
+                          {l.telefono}
+                        </a>
+                      )}
+                      {l.correo && (
+                        <a href={pedido(l.correo)}>
+                          Pedir por correo<span class="solo-lectores"> a {l.nombre}</span>
+                        </a>
+                      )}
+                      {l.enlace && (
+                        <EnlaceExterno href={l.enlace} class="">
+                          Sitio<span class="solo-lectores"> de {l.nombre}</span>
+                        </EnlaceExterno>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      </details>
+    )
+  }
 </Seccion>
 
 <style>
@@ -98,5 +156,108 @@ const { data } = await unico('librerias');
 
   .librerias__nota a {
     font-weight: 600;
+  }
+
+  /* ---- Directorio plegado: las demás librerías, por municipio ---- */
+
+  .directorio {
+    margin-top: 2.5rem;
+    border: 1px solid var(--lomo);
+    background: var(--superficie);
+  }
+
+  .directorio summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.15rem 1rem;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .directorio summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* signo de más que gira a equis al abrir */
+  .directorio summary::after {
+    content: '';
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    width: 0.9rem;
+    height: 0.9rem;
+    background:
+      linear-gradient(var(--acento), var(--acento)) center / 100% 1.5px no-repeat,
+      linear-gradient(var(--acento), var(--acento)) center / 1.5px 100% no-repeat;
+    transition: transform 0.2s;
+  }
+
+  .directorio[open] summary::after {
+    transform: rotate(45deg);
+  }
+
+  .directorio__titulo {
+    font-family: var(--fuente-titulos);
+    font-size: var(--t-h3);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .directorio__cuenta {
+    grid-column: 1;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--texto-suave);
+  }
+
+  .directorio__cuerpo {
+    display: grid;
+    gap: 1.5rem;
+    padding: 0.25rem 1.25rem 1.5rem;
+  }
+
+  .directorio__texto {
+    font-size: var(--t-pequeno);
+    color: var(--texto-suave);
+  }
+
+  .municipio h4 {
+    margin: 0 0 0.25rem;
+    font-size: var(--t-etiqueta);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--acento);
+  }
+
+  .tienda {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0 1.25rem;
+    padding-block: 0.5rem;
+    border-top: 1px solid var(--linea);
+  }
+
+  .tienda__nombre {
+    font-weight: 600;
+  }
+
+  .tienda__contacto {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.1rem;
+    font-size: var(--t-pequeno);
+  }
+
+  .tienda__contacto :global(a) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    min-height: 2.75rem;
+    font-weight: 600;
+    white-space: nowrap;
   }
 </style>

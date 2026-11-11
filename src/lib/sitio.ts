@@ -1,7 +1,7 @@
 import { getEntry } from 'astro:content';
 
 /** Un archivo único de contenido/ (sitio.yaml, novela.md…). */
-export async function unico<C extends 'sitio' | 'novela' | 'universo' | 'autor' | 'librerias' | 'canciones'>(
+export async function unico<C extends 'sitio' | 'novela' | 'universo' | 'autor' | 'librerias' | 'directorio' | 'canciones'>(
   coleccion: C,
 ) {
   const entrada = await getEntry(coleccion, coleccion);
