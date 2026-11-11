@@ -24,7 +24,9 @@ const medidas = portada
     <div class="portada__texto">
       <p class="etiqueta">{sitio.autor} · Novela</p>
       <h1 id="titulo-sitio">{sitio.titulo}</h1>
-      <p class="portada__lema">{sitio.lema}</p>
+      <p class="portada__lema">
+        {sitio.lema.map((linea) => <span>{linea} </span>)}
+      </p>
       {
         sitio.gancho.length > 0 && (
           <p class="portada__gancho">
@@ -35,7 +37,10 @@ const medidas = portada
         )
       }
       <div class="portada__acciones">
-        <a class="boton boton--primario" href={seccion('conseguir')}>Dónde conseguirla</a>
+        <a class="boton boton--primario boton--barra" href={seccion('conseguir')}>
+          Dónde conseguirla
+          <Flecha tipo="diagonal" />
+        </a>
         <a class="enlace" href={seccion('novela')}>
           Conoce la historia
           <Flecha tipo="abajo" />
@@ -50,15 +55,18 @@ const medidas = portada
 
     {
       portada && (
-        <figure class="portada__imagen" style={medidas}>
-          <Image
-            src={portada}
-            alt={sitio.portada_descripcion}
-            widths={anchos}
-            sizes="(min-width: 42rem) 27rem, 80vw"
-            loading="eager"
-            fetchpriority="high"
-          />
+        <figure class="portada__arte" style={medidas}>
+          <div class="portada__libro">
+            <Image
+              src={portada}
+              alt={sitio.portada_descripcion}
+              widths={anchos}
+              sizes="(min-width: 44rem) 25rem, 75vw"
+              loading="eager"
+              fetchpriority="high"
+            />
+          </div>
+          {sitio.frase && <figcaption>{sitio.frase}</figcaption>}
         </figure>
       )
     }
@@ -69,12 +77,12 @@ const medidas = portada
   .portada {
     position: relative;
     overflow: hidden;
-    padding-block: clamp(3rem, 2rem + 5vw, 6rem) clamp(3.5rem, 2rem + 6vw, 7rem);
+    padding-block: clamp(2.5rem, 2rem + 4vw, 5rem) clamp(3rem, 2rem + 5vw, 5.5rem);
   }
 
   .portada__rejilla {
     display: grid;
-    gap: clamp(2.5rem, 6vw, 4rem);
+    gap: clamp(2.25rem, 5%, 4rem);
     align-items: center;
   }
 
@@ -82,8 +90,10 @@ const medidas = portada
     display: grid;
     gap: 1.25rem;
     justify-items: start;
-    /* el título se mide contra el ancho de esta columna (unidades cqi) */
+    /* el título, el lema y el gancho se miden contra el ancho de esta
+       columna (unidades cqi), así llenan el espacio en cualquier pantalla */
     container-type: inline-size;
+    animation: llegar 0.8s ease-out both;
   }
 
   h1 {
@@ -99,19 +109,46 @@ const medidas = portada
   }
 
   .portada__lema {
-    max-width: 24ch;
     font-family: var(--fuente-titulos);
     font-size: clamp(1.75rem, 1.2rem + 2.4vw, 2.5rem);
-    /* en teléfonos crece hasta que su primera línea llena la columna */
-    font-size: clamp(1.75rem, 10.8cqi, 2.5rem);
+    /* crece hasta que su línea más larga llena la columna */
+    font-size: clamp(1.5rem, 9.3cqi, 2.5rem);
     font-style: italic;
     line-height: 1.15;
     color: var(--acento);
+  }
+
+  /* el lema se corta donde lo corta la portada del libro */
+  .portada__lema span {
+    display: block;
     text-wrap: balance;
   }
 
   .portada__gancho {
-    max-width: 34rem;
+    /* cada frase en su línea; el tamaño cede un poco en teléfonos para
+       que la primera quepa entera */
+    font-size: clamp(0.9375rem, 4.3cqi, var(--t-texto));
+    color: var(--texto-suave);
+  }
+
+  .portada__gancho span {
+    display: block;
+  }
+
+  .portada__acciones {
+    display: grid;
+    gap: 0.5rem;
+    justify-items: start;
+    width: 100%;
+    margin-top: 0.75rem;
+  }
+
+  .portada__ficha {
+    margin-top: 1.25rem;
+    font-size: var(--t-etiqueta);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
     color: var(--texto-suave);
   }
 
@@ -127,67 +164,76 @@ const medidas = portada
     }
   }
 
-  /* una frase por línea solo cuando cada una cabe entera */
-  @container (min-width: 30rem) {
-    .portada__gancho span {
-      display: block;
-    }
+  /* ---- El libro: dejado sobre la mesa, bajo una luz ---- */
+
+  .portada__arte {
+    justify-self: center;
+    width: min(78%, 25.5rem, var(--ancho-natural, 25.5rem));
+    padding: 1.25rem 0 1.5rem 1.25rem;
+    /* charco de luz tenue sobre el que descansa */
+    background: radial-gradient(ellipse at center, var(--luz), transparent 70%);
+    animation: llegar 1.1s ease-out both;
   }
 
-  .portada__acciones {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem 1.75rem;
-    margin-top: 0.75rem;
+  .portada__libro {
+    /* el filo izquierdo hace de lomo */
+    border-left: 5px solid var(--lomo);
+    /* un poco torcido, como quien lo suelta sin cuidado */
+    transform: rotate(3deg);
+    /* la luz viene de arriba a la izquierda */
+    box-shadow: 15px 24px 60px rgb(0 0 0 / 0.6);
   }
 
-  .portada__ficha {
-    margin-top: 1.5rem;
-    font-size: var(--t-etiqueta);
-    font-weight: 600;
-    letter-spacing: 0.16em;
+  .portada__libro img {
+    display: block;
+    width: 100%;
+  }
+
+  figcaption {
+    margin-top: 2.2rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.19em;
+    line-height: 1.6;
+    text-align: center;
     text-transform: uppercase;
+    text-wrap: balance;
     color: var(--texto-suave);
   }
 
-  .portada__imagen {
-    position: relative;
-    justify-self: center;
-    width: min(80%, 27rem, var(--ancho-natural, 27rem));
+  @keyframes llegar {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
-  /* halo cálido detrás del libro */
-  .portada__imagen::before {
-    content: '';
-    position: absolute;
-    inset: -18%;
-    z-index: -1;
-    background: radial-gradient(closest-side, rgb(203 182 143 / 0.16), transparent 72%);
-  }
-
-  .portada__imagen img {
-    width: 100%;
-    border-radius: var(--radio);
-    box-shadow:
-      0 0 0 1px var(--linea),
-      0 2rem 3.5rem rgb(0 0 0 / 0.6);
+  @media (prefers-reduced-motion: reduce) {
+    .portada__texto,
+    .portada__arte {
+      animation: none;
+    }
   }
 
   /* Tableta y teléfono horizontal: texto y libro lado a lado */
-  @media (min-width: 42rem) {
+  @media (min-width: 44rem) {
     .portada__rejilla {
       grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
     }
 
-    .portada__imagen {
+    .portada__arte {
       justify-self: end;
-      width: min(100%, 27rem, var(--ancho-natural, 27rem));
+      width: min(100%, 25.5rem, var(--ancho-natural, 25.5rem));
       width: min(
         100%,
-        27rem,
-        var(--ancho-natural, 27rem),
-        max(11rem, (100svh - var(--alto-cabecera) - 9rem) * var(--proporcion, 0.65))
+        25.5rem,
+        var(--ancho-natural, 25.5rem),
+        max(11rem, (100svh - var(--alto-cabecera) - 12rem) * var(--proporcion, 0.65))
       );
     }
   }
@@ -199,13 +245,19 @@ const medidas = portada
   }
 
   /* Pantallas muy bajas (teléfono horizontal): todo más compacto */
-  @media (max-height: 30rem) and (min-width: 42rem) {
+  @media (max-height: 30rem) and (min-width: 36rem) {
     .portada {
       padding-block: 1.5rem 2.5rem;
     }
 
     .portada__rejilla {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
       align-items: start;
+    }
+
+    .portada__arte {
+      justify-self: end;
+      width: min(100%, max(9rem, (100svh - 8.5rem) * var(--proporcion, 0.65)));
     }
 
     .portada__texto {
@@ -222,6 +274,14 @@ const medidas = portada
 
     .portada__ficha {
       margin-top: 0.5rem;
+    }
+
+    .portada__arte {
+      padding-block: 0.5rem;
+    }
+
+    figcaption {
+      display: none;
     }
   }
 </style>

@@ -18,12 +18,15 @@ content:
       - { name: autor, label: Autor (nombre corto), type: string, required: true }
       - { name: genero, label: Género, type: string, required: true }
       - { name: editorial, label: Editorial, type: string, required: true }
-      - { name: lema, label: Lema bajo el título, type: string, required: true }
+      - name: lema
+        label: Lema bajo el título (una línea por renglón)
+        type: string
+        list: true
       - name: gancho
         label: Gancho (una línea por renglón)
         type: string
         list: true
-      - { name: frase, label: Frase destacada tras la portada, type: string }
+      - { name: frase, label: Frase al pie del libro, en el inicio, type: string }
       - { name: portada, label: Imagen de la portada, type: image, required: true }
       - { name: portada_descripcion, label: Descripción de la portada (para lectores de pantalla), type: string, required: true }
       - name: descripcion_buscadores
@@ -54,7 +57,7 @@ content:
           - { name: titular, label: Titular, type: string, required: true }
           - { name: sin_fechas, label: Texto cuando no hay fechas anunciadas, type: text, required: true }
       - name: interludio
-        label: Frase antes de la sección del autor
+        label: Nota junto a la biografía del autor
         type: object
         fields:
           - { name: titular, label: Titular, type: string }

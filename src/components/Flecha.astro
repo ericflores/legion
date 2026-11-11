@@ -1,12 +1,13 @@
 ---
-// Flecha decorativa. "fuera" = el enlace sale del sitio; "abajo" = baja en la página.
+// Flecha decorativa. "fuera" = el enlace sale del sitio; "abajo" y "diagonal" = baja en la página.
 interface Props {
-  tipo?: 'fuera' | 'abajo' | 'derecha';
+  tipo?: 'fuera' | 'abajo' | 'diagonal' | 'derecha';
 }
 const { tipo = 'derecha' } = Astro.props;
 const trazos = {
   fuera: 'M7 17 17 7M9 7h8v8',
   abajo: 'M12 5v14M6 13l6 6 6-6',
+  diagonal: 'M7 7l10 10M9 17h8V9',
   derecha: 'M5 12h14M13 6l6 6-6 6',
 };
 ---

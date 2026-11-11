@@ -24,7 +24,10 @@ const sitio = defineCollection({
     autor: texto,
     genero: texto,
     editorial: texto,
-    lema: texto,
+    // una línea o varias: cada línea de la lista se muestra en su renglón
+    lema: z
+      .union([texto, z.array(texto).min(1)])
+      .transform((v) => (Array.isArray(v) ? v : [v])),
     gancho: z.array(texto).default([]),
     frase: opcional(texto),
     portada: texto,

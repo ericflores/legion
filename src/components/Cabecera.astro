@@ -169,8 +169,14 @@ const { titulo } = Astro.props;
     padding-inline: 1.1rem;
   }
 
-  .cabecera__contacto[aria-current] {
+  .cabecera__contacto {
     border-color: var(--acento);
+    color: var(--acento);
+  }
+
+  .cabecera__contacto:hover,
+  .cabecera__contacto[aria-current] {
+    border-color: var(--acento-claro);
     color: var(--acento-claro);
   }
 

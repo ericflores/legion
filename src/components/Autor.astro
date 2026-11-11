@@ -2,62 +2,82 @@
 import { Image } from 'astro:assets';
 import { render } from 'astro:content';
 import { imagen } from '../lib/imagenes';
-import { seccion, unico } from '../lib/sitio';
+import { numeroDeSeccion, seccion, unico } from '../lib/sitio';
 import Flecha from './Flecha.astro';
 
 const autor = await unico('autor');
+const { data: sitio } = await unico('sitio');
 const { Content: Biografia } = await render(autor);
 const { data } = autor;
 const foto = imagen(data.foto);
+const nota = sitio.interludio;
+const numero = numeroDeSeccion('autor');
 ---
 
-<section id="autor" class:list={['autor', { 'autor--sin-foto': !foto }]} aria-labelledby="autor-titular">
-  <div class="contenedor autor__rejilla">
-    {
-      foto && (
-        <figure class="autor__foto">
-          <Image
-            src={foto}
-            alt={data.foto_descripcion ?? `Retrato de ${data.nombre}`}
-            widths={[360, 640, 960]}
-            sizes="(min-width: 60rem) 30vw, (min-width: 36rem) 22rem, 92vw"
-          />
-        </figure>
-      )
-    }
-    <div class="autor__texto">
-      <p class="etiqueta">{data.etiqueta}</p>
-      <h2 id="autor-titular">{data.nombre}</h2>
-      <div class="prosa">
-        <Biografia />
+<section id="autor" class="autor" aria-labelledby="autor-titular">
+  <div class="contenedor">
+    <div class:list={['autor__rejilla', { 'autor__rejilla--sin-nota': !nota.titular }]}>
+      <div class="autor__lado">
+        <p class="etiqueta">{numero && `${numero} / `}{data.etiqueta}</p>
+        {
+          foto && (
+            <figure class="autor__foto">
+              <Image
+                src={foto}
+                alt={data.foto_descripcion ?? `Retrato de ${data.nombre}`}
+                widths={[240, 480, 720]}
+                sizes="(min-width: 44rem) 16rem, 18rem"
+              />
+            </figure>
+          )
+        }
+      </div>
+
+      <div class="autor__texto">
+        <h2 id="autor-titular">{data.nombre}</h2>
+        <div class="prosa">
+          <Biografia />
+        </div>
+
+        {
+          data.proyectos_texto && (
+            <div class="autor__proyectos">
+              <h3>{data.proyectos_titulo ?? 'Futuros proyectos'}</h3>
+              <p>{data.proyectos_texto}</p>
+            </div>
+          )
+        }
+
+        <a class="enlace" href={seccion('contacto')} data-motivo="Futuros proyectos">
+          Escribe al autor
+          <Flecha tipo="abajo" />
+        </a>
       </div>
 
       {
-        data.proyectos_texto && (
-          <div class="autor__proyectos">
-            <h3>{data.proyectos_titulo ?? 'Futuros proyectos'}</h3>
-            <p>{data.proyectos_texto}</p>
-          </div>
+        nota.titular && (
+          <aside class="autor__nota">
+            <p class="autor__nota-titular">{nota.titular}</p>
+            {nota.texto && <p>{nota.texto}</p>}
+          </aside>
         )
       }
-
-      <a class="enlace" href={seccion('contacto')} data-motivo="Futuros proyectos">
-        Escribe al autor
-        <Flecha tipo="abajo" />
-      </a>
     </div>
   </div>
 </section>
 
 <style>
-  .autor {
+  .autor__rejilla {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3rem);
     padding-block: var(--seccion);
     border-top: 1px solid var(--linea);
   }
 
-  .autor__rejilla {
+  .autor__lado {
     display: grid;
-    gap: clamp(2rem, 5vw, 3.5rem);
+    gap: 1.5rem;
+    align-content: start;
   }
 
   .autor__foto {
@@ -78,15 +98,17 @@ const foto = imagen(data.foto);
     gap: 1.25rem;
     justify-items: start;
     align-content: start;
+    container-type: inline-size;
   }
 
-  .autor__texto .prosa {
-    margin-top: 0.5rem;
+  h2 {
+    font-size: clamp(1.75rem, 11.5cqi, 3.5rem);
   }
 
   .autor__proyectos {
     display: grid;
     gap: 0.5rem;
+    width: 100%;
     max-width: var(--lectura);
     margin-top: 1rem;
     padding-top: 1.5rem;
@@ -99,21 +121,58 @@ const foto = imagen(data.foto);
     color: var(--texto);
   }
 
-  @media (min-width: 60rem) {
-    .autor__rejilla {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-      gap: clamp(3rem, 7vw, 6rem);
-      align-items: start;
-    }
+  /* La nota al margen: el único lugar donde aparece el verde */
+  .autor__nota {
+    display: grid;
+    gap: 0.75rem;
+    align-content: start;
+    align-self: start;
+    padding: clamp(1.5rem, 4vw, 1.9rem);
+    background: var(--superficie);
+    border: 1px solid var(--lomo);
+    font-size: var(--t-pequeno);
+    color: var(--texto-suave);
+  }
 
-    .autor--sin-foto .autor__rejilla {
-      grid-template-columns: minmax(0, 1fr);
+  .autor__nota-titular {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1.25;
+    text-transform: uppercase;
+    text-wrap: balance;
+    color: var(--verde);
+  }
+
+  /* Tableta en vertical: foto y biografía lado a lado, la nota debajo */
+  @media (min-width: 44rem) {
+    .autor__rejilla {
+      grid-template-columns: minmax(0, 0.6fr) minmax(0, 1.4fr);
+      gap: 2.5rem 6%;
     }
 
     .autor__foto {
-      position: sticky;
-      top: calc(var(--alto-cabecera) + 2rem);
       width: 100%;
+    }
+
+    .autor__nota {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* Escritorio: foto, biografía y nota en tres columnas */
+  @media (min-width: 64rem) {
+    .autor__rejilla {
+      grid-template-columns: minmax(0, 0.5fr) minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 5%;
+    }
+
+    .autor__rejilla--sin-nota {
+      grid-template-columns: minmax(0, 0.5fr) minmax(0, 1.7fr);
+    }
+
+    .autor__nota {
+      grid-column: auto;
     }
   }
 </style>

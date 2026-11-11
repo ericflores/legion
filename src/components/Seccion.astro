@@ -1,6 +1,9 @@
 ---
 // Marco común de cada sección: etiqueta dorada + titular a la izquierda,
 // contenido a la derecha (o debajo, con disposicion="apilada").
+// Las secciones del menú llevan número, como los capítulos de un índice.
+import { numeroDeSeccion } from '../lib/sitio';
+
 interface Props {
   id: string;
   etiqueta: string;
@@ -9,51 +12,72 @@ interface Props {
 }
 const { id, etiqueta, titular, disposicion = 'dividida' } = Astro.props;
 const idTitular = `${id}-titular`;
+const numero = numeroDeSeccion(id);
 ---
 
 <section id={id} class:list={['seccion', `seccion--${disposicion}`]} aria-labelledby={idTitular}>
-  <div class="contenedor seccion__rejilla">
-    <header class="seccion__cabeza">
-      <p class="etiqueta">{etiqueta}</p>
-      <h2 id={idTitular}>{titular}</h2>
-      <slot name="cabeza" />
-    </header>
-    <div class="seccion__cuerpo">
-      <slot />
+  <div class="contenedor">
+    <div class="seccion__rejilla">
+      <header class="seccion__cabeza">
+        <p class="etiqueta">{numero && `${numero} / `}{etiqueta}</p>
+        <h2 id={idTitular}>{titular}</h2>
+        <slot name="cabeza" />
+      </header>
+      <div class="seccion__cuerpo">
+        <slot />
+      </div>
     </div>
   </div>
 </section>
 
 <style>
-  .seccion {
-    padding-block: var(--seccion);
-    border-top: 1px solid var(--linea);
-  }
-
+  /* La línea divisoria va solo a lo ancho del contenido, sobre un fondo
+     continuo: la página se lee como una sola superficie. */
   .seccion__rejilla {
     display: grid;
     gap: clamp(2rem, 5vw, 3.5rem);
+    padding-block: var(--seccion);
+    border-top: 1px solid var(--linea);
   }
 
   .seccion__cabeza {
     display: grid;
     gap: 1.25rem;
     align-content: start;
+    /* el titular se mide contra el ancho de su columna */
+    container-type: inline-size;
+  }
+
+  /* lo que va dentro (tarjetas, rejillas) se adapta al ancho de la
+     columna con @container, no al de la pantalla */
+  .seccion__cuerpo {
+    container-type: inline-size;
+  }
+
+  h2 {
+    font-size: clamp(1.75rem, 11.5cqi, 3.5rem);
   }
 
   .seccion--apilada .seccion__cabeza {
     max-width: 44rem;
   }
 
-  @media (min-width: 60rem) {
+  /* Dos columnas desde tableta en vertical, con separación proporcional */
+  @media (min-width: 44rem) {
     .seccion--dividida .seccion__rejilla {
       grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-      gap: clamp(3rem, 7vw, 6rem);
+      gap: 9%;
     }
 
     .seccion--dividida .seccion__cabeza {
       position: sticky;
       top: calc(var(--alto-cabecera) + 2rem);
+    }
+  }
+
+  @media (min-width: 44rem) and (max-height: 30rem) {
+    .seccion--dividida .seccion__cabeza {
+      position: static;
     }
   }
 </style>

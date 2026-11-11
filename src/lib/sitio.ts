@@ -24,6 +24,13 @@ export const SECCIONES = [
   { id: 'autor', nombre: 'El autor' },
 ] as const;
 
+/** "01", "02"… para las secciones del menú (y Contacto); nada para las demás. */
+export function numeroDeSeccion(id: string): string | undefined {
+  const orden: string[] = [...SECCIONES.map((s) => s.id), 'contacto'];
+  const i = orden.indexOf(id);
+  return i >= 0 ? String(i + 1).padStart(2, '0') : undefined;
+}
+
 export const MOTIVOS = [
   'Consulta general',
   'Conseguir un ejemplar',

@@ -6,10 +6,13 @@ genero: Suspenso psicológico
 editorial: Publicaciones Gaviota
 
 # Lo primero que se lee al entrar
-lema: Porque a veces, el enemigo no viene de fuera.
+lema:
+  - Porque a veces,
+  - el enemigo no viene de fuera.
 gancho:
   - Seis testigos lo vieron. Él mismo se vio haciéndolo.
   - Sin embargo, afirma con total convicción que no fue él.
+# Pie pequeño bajo la imagen del libro
 frase: Una verdad más perturbadora que la mentira.
 
 # Imagen de la portada (el archivo vive en contenido/imagenes/)

@@ -18,6 +18,9 @@
   --acento: #cbb68f; /* 9.5:1 sobre el fondo */
   --acento-claro: #e0cfab;
   --sobre-acento: #0b0b0f;
+  --verde: #83a892; /* segundo acento: se usa una sola vez, en la nota del autor */
+  --luz: #28262a; /* el charco de luz bajo el libro */
+  --lomo: #353238; /* filo del libro y borde de la nota */
   --error: #ffa694;
 
   /* Tipografía: una serif editorial que dialoga con la portada
@@ -143,8 +146,13 @@ a {
   text-underline-offset: 0.2em;
 }
 
+/* los enlaces se atenúan al pasar el cursor, como en el sitio original */
+a {
+  transition: opacity 0.2s;
+}
+
 a:hover {
-  color: var(--acento-claro);
+  opacity: 0.75;
 }
 
 :focus-visible {
@@ -255,9 +263,21 @@ a:hover {
   color: var(--sobre-acento);
 }
 
+.boton:hover {
+  opacity: 1;
+}
+
 .boton--primario:hover {
   background: var(--acento-claro);
   color: var(--sobre-acento);
+}
+
+/* barra ancha: el texto a un lado y la flecha al otro extremo */
+.boton--barra {
+  justify-content: space-between;
+  width: min(100%, 18.5rem);
+  min-height: 3.4rem;
+  padding-inline: 1.4rem;
 }
 
 .boton--contorno {
