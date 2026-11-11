@@ -129,6 +129,7 @@ const personajes = defineCollection({
     nombre: texto,
     rol: opcional(texto),
     orden: z.number().default(99),
+    foto: opcional(texto),
   }),
 });
 

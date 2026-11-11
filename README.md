@@ -74,6 +74,14 @@ Aquí puede ir un párrafo opcional con más detalles.
   comprueba la fecha al abrirse, así que las tarjetas aparecen y
   desaparecen el día exacto sin que nadie haga nada.
 
+### Poner o cambiar la cara de un personaje
+
+Cada personaje puede llevar una foto (campo **Foto** en el editor, o `foto:`
+en su archivo de `contenido/personajes/`). Lo ideal es una imagen cuadrada
+de la cara y los hombros, de unos 500 píxeles de lado o más. En el sitio se
+ve pequeña junto al nombre y se agranda al tocarla. Si un personaje no tiene
+foto, su ficha sale solo con el texto.
+
 ### Añadir una canción
 
 En `contenido/canciones.yaml`, copia un bloque de cuatro líneas. `video` es

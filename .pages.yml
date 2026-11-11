@@ -118,6 +118,10 @@ content:
         label: Orden
         type: number
         description: Los números bajos salen primero. El 1 se muestra destacado.
+      - name: foto
+        label: Foto (cara del personaje)
+        type: image
+        description: Opcional. Mejor cuadrada, de la cara y los hombros. Se ve pequeña junto al nombre y se agranda al tocarla.
       - { name: body, label: Descripción, type: rich-text, options: { format: markdown } }
 
   - name: canciones
