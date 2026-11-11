@@ -14,10 +14,15 @@ const { Content: Intro } = await render(universo);
     <Sinopsis />
   </div>
   {
-    novela.data.cita && (
-      <blockquote class="cita">
-        <p>{novela.data.cita}</p>
-      </blockquote>
+    (novela.data.cita || novela.data.cierre) && (
+      <div class="cita">
+        {novela.data.cita && (
+          <blockquote>
+            <p>{novela.data.cita}</p>
+          </blockquote>
+        )}
+        {novela.data.cierre && <p class="cita__cierre">{novela.data.cierre}</p>}
+      </div>
     )
   }
 </Seccion>
@@ -61,6 +66,12 @@ const { Content: Intro } = await render(universo);
     font-style: italic;
     line-height: 1.3;
     color: var(--texto);
+  }
+
+  .cita .cita__cierre {
+    margin-top: 1rem;
+    font-size: clamp(1.25rem, 1.1rem + 0.7vw, 1.5rem);
+    color: var(--acento);
   }
 
   .datos {

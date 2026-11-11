@@ -80,6 +80,7 @@ content:
       - { name: titular, label: Titular, type: string, required: true }
       - { name: body, label: Sinopsis, type: rich-text, options: { format: markdown } }
       - { name: cita, label: Cita destacada, type: text }
+      - { name: cierre, label: Línea de cierre bajo la cita, type: string }
 
   - name: universo
     label: El universo

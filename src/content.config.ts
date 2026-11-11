@@ -49,7 +49,7 @@ const sitio = defineCollection({
 
 const novela = defineCollection({
   loader: unArchivo('novela.md'),
-  schema: z.object({ ...encabezado, cita: opcional(texto) }),
+  schema: z.object({ ...encabezado, cita: opcional(texto), cierre: opcional(texto) }),
 });
 
 const universo = defineCollection({
