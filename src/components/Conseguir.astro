@@ -16,10 +16,12 @@ const { data } = await unico('librerias');
               <h3>{l.nombre}</h3>
               {l.lugar && <p class="libreria__lugar">{l.lugar}</p>}
             </div>
-            {l.enlace && (
+            {l.enlace ? (
               <EnlaceExterno href={l.enlace}>
-                Visitar<span class="solo-lectores"> {l.nombre}</span>
+                Comprar en línea<span class="solo-lectores"> en {l.nombre}</span>
               </EnlaceExterno>
+            ) : (
+              <span class="libreria__tienda">En tienda</span>
             )}
           </li>
         ))}
@@ -50,6 +52,12 @@ const { data } = await unico('librerias');
 
   .libreria__lugar {
     font-size: var(--t-pequeno);
+    color: var(--texto-suave);
+  }
+
+  .libreria__tienda {
+    font-size: var(--t-pequeno);
+    font-weight: 500;
     color: var(--texto-suave);
   }
 

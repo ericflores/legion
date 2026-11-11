@@ -1,5 +1,6 @@
 # Lugares de venta. Para añadir uno, copia un bloque de tres líneas.
-# "enlace" es opcional: la página web o el mapa de la librería.
+# "enlace" es opcional: la página del libro en la tienda en línea de la
+# librería. Si se deja vacío, se indica que se vende solo en la tienda.
 
 etiqueta: Dónde conseguirla
 titular: Encuentra tu ejemplar de Legión.
@@ -11,13 +12,13 @@ lista:
     enlace:
   - nombre: Librería Norberto González
     lugar: Río Piedras
-    enlace:
+    enlace: https://www.libreriang.com/index.php?route=product/product&product_id=101995
   - nombre: Librería Laberinto
-    lugar:
-    enlace:
+    lugar: Viejo San Juan
+    enlace: https://librerialaberintopr.com/products/legion-efrain-a-flores-acosta
   - nombre: Librería Isla
     lugar:
-    enlace:
+    enlace: https://www.libreriaisla.com/products/legion-porque-a-veces-el-enemigo-nos-viene-de-fuera-efrain-a-flores-acosta-9781615056811
   - nombre: Libros787
-    lugar:
-    enlace:
+    lugar: Tienda en línea
+    enlace: https://libros787.com/products/legion-porque-a-veces-el-enemigo-no-viene-de-fuera

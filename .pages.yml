@@ -154,7 +154,10 @@ content:
         fields:
           - { name: nombre, label: Nombre, type: string, required: true }
           - { name: lugar, label: Lugar, type: string }
-          - { name: enlace, label: Página web o mapa (opcional), type: string }
+          - name: enlace
+            label: Página del libro en su tienda en línea (opcional)
+            type: string
+            description: Si se deja vacío, se muestra "En tienda".
 
   - name: encuentros
     label: Encuentros
