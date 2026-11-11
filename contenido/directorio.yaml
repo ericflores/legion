@@ -35,11 +35,16 @@ lista:
     telefono: 787-370-0355
     correo: libreriamagicapr@gmail.com
     enlace: 
-  - nombre: "La Esquina"
+  - nombre: "La Esquina Bookstore (La Goyco, calle Loíza)"
     municipio: San Juan
-    telefono: 787-368-5363
-    correo: 
-    enlace: 
+    telefono: 787-340-9759
+    correo:
+    enlace:
+  - nombre: "Librería La Esquinita (Santurce)"
+    municipio: San Juan
+    telefono:
+    correo: libreria.laesquinita@gmail.com
+    enlace:
   - nombre: "The Bookmark (San Patricio)"
     municipio: Guaynabo
     telefono: 787-710-7848
@@ -73,18 +78,23 @@ lista:
   - nombre: "Librería Norberto González (UPR Cayey)"
     municipio: Cayey
     telefono: 787-263-5266
-    correo: 
+    correo: serviciocliente@libreriang.com
     enlace: 
   - nombre: "Librería Camar"
     municipio: Humacao
     telefono: 787-850-5680
-    correo: 
+    correo: libreriacamar@gmail.com
     enlace: https://www.facebook.com/libreriacamar
   - nombre: "Librería Universal"
     municipio: Mayagüez
     telefono: 787-833-6041
     correo: 
     enlace: 
+  - nombre: "Librería Colegial (RUM)"
+    municipio: Mayagüez
+    telefono: 787-265-3885
+    correo: libreria.uprm@gmail.com
+    enlace: https://www.uprm.edu/centro-de-estudiantes/servicios-comerciales/
   - nombre: "Mikaela's BookCafé (Mayagüez Mall)"
     municipio: Mayagüez
     telefono: 939-287-6261
