@@ -41,7 +41,11 @@ const medidas = portada
           <Flecha tipo="abajo" />
         </a>
       </div>
-      <p class="portada__ficha">{sitio.genero} · {sitio.editorial}</p>
+      <p class="portada__ficha">
+        <span>{sitio.genero}</span>
+        <span class="portada__punto" aria-hidden="true"> · </span>
+        <span>{sitio.editorial}</span>
+      </p>
     </div>
 
     {
@@ -85,7 +89,7 @@ const medidas = portada
   h1 {
     font-size: var(--t-h1);
     /* tan grande como quepa en la columna, sin comerse una pantalla baja */
-    font-size: clamp(3.5rem, min(25cqi, 22svh), 9rem);
+    font-size: clamp(3.5rem, min(26cqi, 22svh), 9rem);
     font-weight: 600;
     line-height: 0.9;
     letter-spacing: 0.035em;
@@ -98,6 +102,8 @@ const medidas = portada
     max-width: 24ch;
     font-family: var(--fuente-titulos);
     font-size: clamp(1.75rem, 1.2rem + 2.4vw, 2.5rem);
+    /* en teléfonos crece hasta que su primera línea llena la columna */
+    font-size: clamp(1.75rem, 10.8cqi, 2.5rem);
     font-style: italic;
     line-height: 1.15;
     color: var(--acento);
@@ -107,6 +113,18 @@ const medidas = portada
   .portada__gancho {
     max-width: 34rem;
     color: var(--texto-suave);
+  }
+
+  /* Si género y editorial no caben en una línea, van una bajo la otra
+     en vez de dejar el punto colgando al final */
+  @container (max-width: 25rem) {
+    .portada__ficha span {
+      display: block;
+    }
+
+    .portada__ficha .portada__punto {
+      display: none;
+    }
   }
 
   /* una frase por línea solo cuando cada una cabe entera */
