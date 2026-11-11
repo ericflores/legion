@@ -17,6 +17,7 @@ Cada cambio guardado se publica solo en uno o dos minutos.
 | La sinopsis                                  | `contenido/novela.md`                |
 | Ambientación y temas                         | `contenido/universo.md`              |
 | Un personaje                                 | `contenido/personajes/` (uno por archivo) |
+| Las canciones de la banda sonora             | `contenido/canciones.yaml`           |
 | Las librerías donde se vende                 | `contenido/librerias.yaml`           |
 | Una venta o presentación                     | `contenido/encuentros/` (una por archivo) |
 | La biografía y los futuros proyectos         | `contenido/autor.md`                 |
@@ -55,6 +56,14 @@ Aquí puede ir un párrafo opcional con más detalles.
 - Cuando pasa la fecha, el encuentro deja de mostrarse. No hay que borrarlo.
 - Si no queda ninguno, el sitio muestra el texto `sin_fechas` de
   `contenido/sitio.yaml`.
+
+### Añadir una canción
+
+En `contenido/canciones.yaml`, copia un bloque de cuatro líneas. `video` es
+el código de YouTube de la canción: lo que aparece después de `v=` en su
+enlace (por ejemplo, en `youtube.com/watch?v=hLQl3WQQoQ0` es `hLQl3WQQoQ0`).
+El orden de la lista es el orden en que suenan. Esta lista es independiente
+de la playlist de YouTube: si añades una canción allí, añádela también aquí.
 
 ### Añadir una librería
 

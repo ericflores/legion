@@ -86,6 +86,23 @@ const librerias = defineCollection({
   }),
 });
 
+const canciones = defineCollection({
+  loader: unArchivo('canciones.yaml'),
+  schema: z.object({
+    lista: z
+      .array(
+        z.object({
+          titulo: texto,
+          artista: opcional(texto),
+          // el código de YouTube: 11 letras, números, guiones o guiones bajos
+          video: z.string().regex(/^[\w-]{11}$/, 'El código de YouTube tiene 11 caracteres (lo que va después de "v=").'),
+          duracion: opcional(z.coerce.string()),
+        }),
+      )
+      .default([]),
+  }),
+});
+
 const personajes = defineCollection({
   loader: glob({ pattern: '*.md', base: './contenido/personajes' }),
   schema: z.object({
@@ -107,4 +124,4 @@ const encuentros = defineCollection({
   }),
 });
 
-export const collections = { sitio, novela, universo, autor, librerias, personajes, encuentros };
+export const collections = { sitio, novela, universo, autor, librerias, canciones, personajes, encuentros };

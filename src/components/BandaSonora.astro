@@ -1,5 +1,9 @@
 ---
+// Banda sonora: la lista de canciones a la vista y un reproductor que
+// aparece al elegir una. La música la sirve YouTube, pero su reproductor
+// no se carga (ni deja cookies) hasta que el visitante pulsa una canción.
 import type { CollectionEntry } from 'astro:content';
+import { unico } from '../lib/sitio';
 import EnlaceExterno from './EnlaceExterno.astro';
 import Seccion from './Seccion.astro';
 
@@ -7,27 +11,311 @@ interface Props {
   datos: CollectionEntry<'sitio'>['data']['banda_sonora'];
 }
 const { datos } = Astro.props;
+const { lista } = (await unico('canciones')).data;
+
+// Sin JavaScript cada canción es un enlace normal a YouTube.
+const enYouTube = (video: string) => `https://www.youtube.com/watch?v=${video}`;
 ---
 
 <Seccion id="banda-sonora" etiqueta={datos.etiqueta} titular={datos.titular}>
   <div class="banda">
-    <p>{datos.texto}</p>
+    <p class="banda__texto">{datos.texto}</p>
+
+    {
+      lista.length > 0 && (
+        <div class="reproductor" data-reproductor data-videos={lista.map((c) => c.video).join(',')}>
+          <div class="reproductor__marco" data-marco hidden>
+            <div data-destino />
+          </div>
+
+          <div class="reproductor__barra">
+            <button class="boton boton--primario" type="button" data-tocar="0" hidden>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+                <path d="M7 4.5v15l13-7.5z" />
+              </svg>
+              Escuchar aquí
+            </button>
+            <p class="reproductor__aviso">
+              Suena con el reproductor de YouTube, sin salir de esta página. Al iniciarlo, YouTube puede usar cookies.
+            </p>
+          </div>
+
+          <ol class="canciones" role="list">
+            {lista.map((c, i) => (
+              <li>
+                <a class="cancion" href={enYouTube(c.video)} data-tocar={i}>
+                  <span class="cancion__numero" aria-hidden="true">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span class="cancion__datos">
+                    <span class="cancion__titulo">{c.titulo}</span>
+                    {c.artista && <span class="cancion__artista">{c.artista}</span>}
+                  </span>
+                  {c.duracion && <span class="cancion__duracion">{c.duracion}</span>}
+                </a>
+              </li>
+            ))}
+          </ol>
+
+          <p class="solo-lectores" role="status" data-anuncio />
+        </div>
+      )
+    }
+
     {
       datos.enlace && (
-        <EnlaceExterno href={datos.enlace} class="boton boton--contorno">
-          {datos.enlace_texto}
+        <EnlaceExterno href={datos.enlace}>
+          {lista.length > 0 ? 'Abrir la playlist en YouTube' : datos.enlace_texto}
         </EnlaceExterno>
       )
     }
   </div>
 </Seccion>
 
+<script>
+  // Interfaz mínima de la API de reproductores de YouTube que se usa aquí.
+  interface Reproductor {
+    loadPlaylist(videos: string[], indice: number): void;
+    playVideoAt(indice: number): void;
+    getPlaylistIndex(): number;
+  }
+  interface ApiYouTube {
+    Player: new (
+      destino: HTMLElement,
+      opciones: {
+        host: string;
+        width: string;
+        height: string;
+        playerVars: Record<string, number | string>;
+        events: { onReady: () => void; onStateChange: (e: { data: number }) => void };
+      },
+    ) => Reproductor;
+  }
+  type Ventana = Window & { YT?: ApiYouTube; onYouTubeIframeAPIReady?: () => void };
+
+  const raiz = document.querySelector<HTMLElement>('[data-reproductor]');
+
+  if (raiz) {
+    const videos = (raiz.dataset.videos ?? '').split(',').filter(Boolean);
+    const marco = raiz.querySelector<HTMLElement>('[data-marco]')!;
+    const destino = raiz.querySelector<HTMLElement>('[data-destino]')!;
+    const anuncio = raiz.querySelector<HTMLElement>('[data-anuncio]')!;
+    const canciones = [...raiz.querySelectorAll<HTMLAnchorElement>('a[data-tocar]')];
+    const ventana = window as Ventana;
+    // el servidor de YouTube que no guarda cookies hasta que se pulsa reproducir
+    const SERVIDOR = 'https://www.youtube-nocookie.com';
+
+    let reproductor: Reproductor | undefined;
+    let listo = false;
+    let pendiente = 0;
+
+    // Con JavaScript hay botón de "Escuchar aquí"
+    raiz.querySelector<HTMLElement>('button[data-tocar]')!.hidden = false;
+
+    const marcar = (indice: number) => {
+      canciones.forEach((c, i) => {
+        if (i === indice) c.setAttribute('aria-current', 'true');
+        else c.removeAttribute('aria-current');
+      });
+      const titulo = canciones[indice]?.querySelector('.cancion__titulo')?.textContent;
+      if (titulo && anuncio.dataset.actual !== String(indice)) {
+        anuncio.dataset.actual = String(indice);
+        anuncio.textContent = `Reproduciendo: ${titulo}`;
+      }
+    };
+
+    const cargarApi = () =>
+      new Promise<ApiYouTube>((resolver, rechazar) => {
+        if (ventana.YT?.Player) return resolver(ventana.YT);
+        const previo = ventana.onYouTubeIframeAPIReady;
+        ventana.onYouTubeIframeAPIReady = () => {
+          previo?.();
+          resolver(ventana.YT!);
+        };
+        const guion = document.createElement('script');
+        guion.src = 'https://www.youtube.com/iframe_api';
+        guion.onerror = () => rechazar(new Error('No se pudo cargar YouTube'));
+        document.head.append(guion);
+      });
+
+    // Si la API no carga (un bloqueador, por ejemplo), sirve el reproductor
+    // incrustado directamente: suena igual, solo que la lista no sigue la canción.
+    const incrustar = (indice: number) => {
+      const marcoDirecto = document.createElement('iframe');
+      marcoDirecto.src = `${SERVIDOR}/embed/${videos[indice]}?autoplay=1&rel=0&playsinline=1&playlist=${videos.join(',')}`;
+      marcoDirecto.title = 'Reproductor de la banda sonora';
+      marcoDirecto.allow = 'autoplay; encrypted-media; picture-in-picture';
+      marcoDirecto.allowFullscreen = true;
+      destino.replaceChildren(marcoDirecto);
+    };
+
+    const tocar = async (indice: number) => {
+      marco.hidden = false;
+      // ya está sonando: el botón de inicio sobra
+      raiz.querySelector<HTMLElement>('button[data-tocar]')!.hidden = true;
+      marcar(indice);
+      pendiente = indice;
+
+      if (reproductor) {
+        if (listo) reproductor.playVideoAt(indice);
+        return;
+      }
+
+      try {
+        const YT = await cargarApi();
+        if (reproductor) return;
+        reproductor = new YT.Player(destino, {
+          host: SERVIDOR,
+          width: '100%',
+          height: '100%',
+          playerVars: { autoplay: 1, playsinline: 1, rel: 0 },
+          events: {
+            onReady: () => {
+              listo = true;
+              reproductor!.loadPlaylist(videos, pendiente);
+            },
+            // al pasar sola a la siguiente canción, la lista la sigue
+            onStateChange: (e) => {
+              if (e.data === 1 || e.data === 3) {
+                const actual = reproductor!.getPlaylistIndex();
+                if (actual >= 0) marcar(actual);
+              }
+            },
+          },
+        });
+      } catch {
+        incrustar(indice);
+      }
+    };
+
+    raiz.addEventListener('click', (e) => {
+      const origen = (e.target as HTMLElement).closest<HTMLElement>('[data-tocar]');
+      if (!origen) return;
+      // con Ctrl, Cmd o el botón central el enlace abre YouTube, como siempre
+      const raton = e as MouseEvent;
+      if (raton.metaKey || raton.ctrlKey || raton.shiftKey || raton.button !== 0) return;
+      e.preventDefault();
+      void tocar(Number(origen.dataset.tocar));
+      if (origen.tagName === 'BUTTON') marco.scrollIntoView({ block: 'nearest' });
+    });
+  }
+</script>
+
 <style>
   .banda {
     display: grid;
     gap: 1.75rem;
     justify-items: start;
+  }
+
+  .banda__texto {
     max-width: var(--lectura);
+    color: var(--texto-suave);
+  }
+
+  .reproductor {
+    display: grid;
+    gap: 1.25rem;
+    width: 100%;
+  }
+
+  .reproductor__marco {
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border: 1px solid var(--lomo);
+  }
+
+  .reproductor__marco :global(iframe),
+  .reproductor__marco > div {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .reproductor__barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.25rem;
+  }
+
+  .reproductor__aviso {
+    flex: 1 1 16rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--texto-suave);
+  }
+
+  .canciones {
+    margin: 0;
+    border-top: 1px solid var(--linea-fuerte);
+  }
+
+  .cancion {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 3.5rem;
+    padding: 0.7rem 0.75rem 0.7rem 0.5rem;
+    border-bottom: 1px solid var(--linea);
+    /* la raya de la canción que suena ocupa siempre su sitio */
+    border-left: 2px solid transparent;
+    color: var(--texto);
+    text-decoration: none;
+  }
+
+  .cancion:hover {
+    opacity: 1;
+    background: var(--superficie);
+  }
+
+  .cancion[aria-current] {
+    border-left-color: var(--acento);
+    background: var(--superficie);
+  }
+
+  .cancion__numero {
+    font-size: var(--t-etiqueta);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--acento);
+  }
+
+  /* la canción que suena cambia el número por un triángulo */
+  .cancion[aria-current] .cancion__numero {
+    font-size: 0;
+  }
+
+  .cancion[aria-current] .cancion__numero::before {
+    content: '▶';
+    font-size: 0.75rem;
+  }
+
+  .cancion__datos {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .cancion__titulo {
+    font-family: var(--fuente-titulos);
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .cancion__artista {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--texto-suave);
+  }
+
+  .cancion__duracion {
+    font-size: 0.875rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
     color: var(--texto-suave);
   }
 </style>

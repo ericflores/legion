@@ -1,0 +1,34 @@
+# Canciones de la banda sonora, en el orden en que se reproducen.
+# Para añadir una, copia un bloque de cuatro líneas.
+# "video" es el código de YouTube: lo que va después de "v=" en el enlace
+# de la canción (11 letras y números).
+
+lista:
+  - titulo: Canon en re mayor
+    artista: Johann Pachelbel · Jacob's Piano
+    video: 1elGqARTb1Q
+    duracion: "3:03"
+  - titulo: Just the Way You Are
+    artista: Bruno Mars · versión de piano de Francesco Parrino
+    video: eF9iBFyqQaY
+    duracion: "3:10"
+  - titulo: Someone Like You
+    artista: Adele
+    video: hLQl3WQQoQ0
+    duracion: "4:45"
+  - titulo: Cinema Paradiso
+    artista: Ennio Morricone · Benedetta Caretta
+    video: jNQ8e-cAD7M
+    duracion: "2:57"
+  - titulo: Naturaleza muerta
+    artista: Mario Frangoulis
+    video: aVKWWdhMpf0
+    duracion: "5:03"
+  - titulo: Sanar
+    artista: Jorge Drexler
+    video: Ajj8jvMrLOw
+    duracion: "4:29"
+  - titulo: Qué bello es vivir
+    artista: El Kanka
+    video: KA5Mi-136Ns
+    duracion: "3:58"

@@ -120,6 +120,25 @@ content:
         description: Los números bajos salen primero. El 1 se muestra destacado.
       - { name: body, label: Descripción, type: rich-text, options: { format: markdown } }
 
+  - name: canciones
+    label: Banda sonora (canciones)
+    type: file
+    path: contenido/canciones.yaml
+    fields:
+      - name: lista
+        label: Canciones, en orden de reproducción
+        type: object
+        list: true
+        fields:
+          - { name: titulo, label: Título, type: string, required: true }
+          - { name: artista, label: Intérprete, type: string }
+          - name: video
+            label: Código de YouTube
+            type: string
+            required: true
+            pattern: { regex: '^[A-Za-z0-9_-]{11}$', message: 'Son 11 caracteres: lo que va después de "v=" en el enlace de la canción.' }
+          - { name: duracion, label: 'Duración (por ejemplo 3:05)', type: string }
+
   - name: librerias
     label: Dónde conseguirla
     type: file
