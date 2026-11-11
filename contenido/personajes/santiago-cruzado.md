@@ -1,7 +1,7 @@
 ---
 nombre: Reverendo Santiago Cruzado
 rol: Líder pentecostal
-orden: 4
+orden: 5
 foto: santiago.webp
 ---
 

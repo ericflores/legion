@@ -117,7 +117,7 @@ content:
       - name: orden
         label: Orden
         type: number
-        description: Los números bajos salen primero. El 1 se muestra destacado.
+        description: Los números bajos salen primero. El 1 y el 2 se muestran destacados, en la primera fila.
       - name: foto
         label: Foto (cara del personaje)
         type: image

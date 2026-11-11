@@ -236,29 +236,37 @@ const fichas = await Promise.all(
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    /* el protagonista (primero en orden) ocupa la fila completa */
-    .personaje:first-child {
-      grid-column: 1 / -1;
+    /* los dos primeros en orden (el protagonista y quien lo acompaña)
+       comparten la primera fila, destacados */
+    .personaje:nth-child(-n + 2) {
       background: var(--superficie);
     }
 
-    .personaje:first-child h3 {
+    .personaje:nth-child(-n + 2) h3 {
       font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.25rem);
     }
 
-    .personaje:first-child .personaje__cara {
+    .personaje:nth-child(-n + 2) .personaje__cara {
       width: 6rem;
     }
 
-    .personaje:first-child .personaje__texto {
-      max-width: var(--lectura);
+    .personaje:nth-child(-n + 2) .personaje__texto {
       font-size: var(--t-texto);
     }
   }
 
+  /* pantallas anchas: los dos destacados a media fila cada uno; los demás, de tres en tres */
   @media (min-width: 68rem) {
     .personajes {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+
+    .personaje {
+      grid-column: span 2;
+    }
+
+    .personaje:nth-child(-n + 2) {
+      grid-column: span 3;
     }
   }
 </style>

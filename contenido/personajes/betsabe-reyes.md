@@ -1,7 +1,7 @@
 ---
 nombre: Betsabé Reyes
 rol: Esposa del reverendo
-orden: 5
+orden: 6
 foto: betsabe.webp
 ---
 
