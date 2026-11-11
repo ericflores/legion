@@ -4,9 +4,9 @@ import type { CollectionEntry } from 'astro:content';
 import { imagen } from '../lib/imagenes';
 import { seccion } from '../lib/sitio';
 import Flecha from './Flecha.astro';
-// Mármol de las letras del título. Se dibuja en src/assets/marmol.svg y se
-// convierte a imagen con "npm run marmol", para que se vea igual en todos
-// los navegadores.
+// Mármol de las letras del título: el primer instante del humo, quieto. Lo
+// genera "npm run marmol" a partir de src/lib/humo.frag, el mismo dibujo que
+// luego se anima (ver el guion al final de este archivo).
 import marmol from '../assets/marmol.webp';
 
 interface Props {
@@ -27,7 +27,10 @@ const medidas = portada
   <div class="contenedor portada__rejilla">
     <div class="portada__texto">
       <p class="etiqueta">{sitio.autor} · Novela</p>
-      <h1 id="titulo-sitio" style={`--marmol: url(${marmol.src})`}>{sitio.titulo}</h1>
+      <h1 id="titulo-sitio" style={`--marmol: url(${marmol.src})`} data-humo>
+        <canvas class="titulo__humo" aria-hidden="true"></canvas>
+        <span class="titulo__texto">{sitio.titulo}</span>
+      </h1>
       <p class="portada__lema">
         {sitio.lema.map((linea) => <span>{linea} </span>)}
       </p>
@@ -77,6 +80,230 @@ const medidas = portada
   </div>
 </section>
 
+<script>
+  // Humo del título: las vetas de mármol de "LEGIÓN" suben y se enroscan muy
+  // despacio. El dibujo está en src/lib/humo.frag; esto lo pone en marcha.
+  //
+  // Es un adorno y nunca estorba: si el navegador no puede (no hay WebGL, o
+  // dibujaría sin tarjeta gráfica), si el visitante pidió menos movimiento o
+  // usa colores forzados, se queda el mármol quieto de siempre. Solo trabaja
+  // mientras el título está a la vista y se acomoda a lo que el equipo puede
+  // pintar con holgura.
+  import fuente from '../lib/humo.frag?raw';
+
+  const titulo = document.querySelector<HTMLElement>('[data-humo]');
+  const lienzo = titulo?.querySelector('canvas');
+
+  if (titulo && lienzo && 'ResizeObserver' in window && 'IntersectionObserver' in window) {
+    const quieto = matchMedia('(prefers-reduced-motion: reduce)');
+    const forzado = matchMedia('(forced-colors: active)');
+    const ARRANQUE = 2; // segundos que tarda en tomar velocidad
+    const PRESUPUESTO = 8; // milisegundos que puede costar pintar un cuadro
+    const DENSIDAD_MINIMA = 0.75; // píxeles del lienzo por píxel de la página; con menos, mejor nada
+
+    let gl: WebGLRenderingContext | null = null;
+    let programa: WebGLProgram | null = null;
+    let variables: Record<'origen' | 'escala' | 'px' | 't', WebGLUniformLocation | null> | undefined;
+    let imposible = false; // este equipo no puede: no se insiste
+    let aLaVista = false;
+    let bucle = 0;
+    let reloj = 0; // segundos de animación; solo corre mientras se ve
+    let anterior = 0;
+    let cuadros = 0;
+    let tope = 1_400_000; // píxeles del lienzo, como mucho; baja si el equipo va justo
+
+    // Sin tarjeta gráfica el navegador dibujaría con el procesador: no compensa.
+    // (Se le pide que en ese caso no dé WebGL, pero no siempre hace caso.)
+    const porSoftware = (gl: WebGLRenderingContext) => {
+      const detalle = gl.getExtension('WEBGL_debug_renderer_info');
+      const tarjeta = `${detalle ? gl.getParameter(detalle.UNMASKED_RENDERER_WEBGL) : ''} ${gl.getParameter(gl.RENDERER)}`;
+      return /swiftshader|llvmpipe|softpipe|software|basic render/i.test(tarjeta);
+    };
+
+    const compilar = (tipo: number, texto: string) => {
+      const pieza = gl!.createShader(tipo);
+      if (!pieza) return null;
+      gl!.shaderSource(pieza, texto);
+      gl!.compileShader(pieza);
+      return pieza;
+    };
+
+    const parar = () => {
+      cancelAnimationFrame(bucle);
+      bucle = 0;
+    };
+
+    // Vuelve al mármol quieto. Si es porque el contexto se perdió, puede
+    // volver; cualquier otro motivo no tiene arreglo: no se insiste y se
+    // suelta lo que se hubiera reservado.
+    const rendirse = () => {
+      parar();
+      titulo.classList.remove('con-humo');
+      imposible = !gl?.isContextLost();
+      if (imposible) gl?.getExtension('WEBGL_lose_context')?.loseContext();
+      return false;
+    };
+
+    // Prepara WebGL y el dibujo. Devuelve si quedó listo.
+    const preparar = () => {
+      if (imposible) return false;
+      if (programa) return true;
+      gl ??= lienzo.getContext('webgl', {
+        alpha: false,
+        antialias: false,
+        depth: false,
+        stencil: false,
+        powerPreference: 'low-power',
+        failIfMajorPerformanceCaveat: true,
+      });
+      const fino = gl?.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT);
+      if (!gl || porSoftware(gl) || !gl.getExtension('OES_standard_derivatives') || !fino || fino.precision < 23) {
+        return rendirse();
+      }
+      const nuevo = gl.createProgram();
+      const vertices = compilar(gl.VERTEX_SHADER, 'attribute vec2 a; void main() { gl_Position = vec4(a, 0.0, 1.0); }');
+      // sin comentarios: hay navegadores que solo admiten ASCII en el código
+      const pintura = compilar(gl.FRAGMENT_SHADER, fuente.replace(/\/\/.*$/gm, ''));
+      if (nuevo && vertices && pintura) {
+        gl.attachShader(nuevo, vertices);
+        gl.attachShader(nuevo, pintura);
+        gl.bindAttribLocation(nuevo, 0, 'a');
+        gl.linkProgram(nuevo);
+      }
+      if (!nuevo || !gl.getProgramParameter(nuevo, gl.LINK_STATUS)) return rendirse();
+      gl.useProgram(nuevo);
+      // un solo triángulo que cubre todo el lienzo
+      gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+      variables = {
+        origen: gl.getUniformLocation(nuevo, 'u_origen'),
+        escala: gl.getUniformLocation(nuevo, 'u_escala'),
+        px: gl.getUniformLocation(nuevo, 'u_px'),
+        t: gl.getUniformLocation(nuevo, 'u_t'),
+      };
+      programa = nuevo;
+      return true;
+    };
+
+    const dibujar = () => {
+      if (!gl || !programa || !variables) return;
+      // arranca desde el reposo y va tomando velocidad
+      gl.uniform1f(variables.t, reloj - ARRANQUE * (1 - Math.exp(-reloj / ARRANQUE)));
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+    };
+
+    // Ajusta el lienzo a la caja del título y vuelve a dibujar. El dibujo se
+    // mide contra el alto de la caja, como la imagen fija, y así coinciden.
+    const medir = () => {
+      if (!gl || !programa || !variables) return;
+      const estilo = getComputedStyle(titulo);
+      const ancho = parseFloat(estilo.width) - 2;
+      const alto = parseFloat(estilo.height) - 2;
+      if (!(ancho > 1 && alto > 1)) return;
+      // el título se dibuja estrechado: el lienzo tiene los píxeles que de verdad se ven
+      const estrecho = new DOMMatrixReadOnly(estilo.transform).a || 1;
+      const densidad = Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(tope / (ancho * estrecho * alto)));
+      if (densidad < DENSIDAD_MINIMA) {
+        rendirse();
+        return;
+      }
+      const w = Math.max(1, Math.round(ancho * estrecho * densidad));
+      const h = Math.max(1, Math.round(alto * densidad));
+      if (lienzo.width !== w || lienzo.height !== h) {
+        lienzo.width = w;
+        lienzo.height = h;
+      }
+      const caja = alto + 2;
+      gl.viewport(0, 0, w, h);
+      gl.uniform2f(variables.origen, w / ancho, h / alto);
+      gl.uniform2f(variables.escala, (estrecho * ancho) / (w * caja), alto / (h * caja));
+      gl.uniform1f(variables.px, alto / (h * caja));
+      dibujar();
+    };
+
+    // Cronometra lo que cuesta pintar un cuadro (leer un píxel obliga a
+    // esperar a que la tarjeta termine). Si se pasa del presupuesto, el
+    // lienzo se queda con los píxeles que sí caben en él: el humo sale algo
+    // más suave y las letras igual de nítidas. Si ni así, mármol quieto.
+    const cronometrar = () => {
+      if (!gl || !programa) return;
+      const pixel = new Uint8Array(4);
+      let coste = Infinity;
+      gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+      for (let i = 0; i < 2; i++) {
+        const inicio = performance.now();
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+        coste = Math.min(coste, performance.now() - inicio);
+      }
+      if (coste > PRESUPUESTO) {
+        tope = (lienzo.width * lienzo.height * PRESUPUESTO) / coste;
+        medir();
+      }
+    };
+
+    // Unos 30 cuadros por segundo: de sobra para algo tan lento.
+    const cuadro = (ahora: number) => {
+      bucle = requestAnimationFrame(cuadro);
+      const paso = ahora - anterior;
+      if (paso < 30) return;
+      anterior = ahora;
+      reloj += Math.min(paso, 100) / 1000;
+      dibujar();
+      // con el dibujo ya rodado (los primeros cuadros cargan con la preparación)
+      if (++cuadros === 10) cronometrar();
+    };
+
+    // Deja el humo como toca según lo que pase en cada momento.
+    const ajustar = () => {
+      if (forzado.matches) {
+        parar();
+        titulo.classList.remove('con-humo');
+        return;
+      }
+      if (!titulo.classList.contains('con-humo')) {
+        // con movimiento reducido ni se enciende; si ya lo estaba, se congela
+        if (!aLaVista || quieto.matches || !preparar()) return;
+        medir();
+        if (imposible) return;
+        titulo.classList.add('con-humo');
+      }
+      if (!aLaVista || quieto.matches) parar();
+      else if (!bucle) {
+        anterior = performance.now();
+        bucle = requestAnimationFrame(cuadro);
+      }
+    };
+
+    const vista = new IntersectionObserver((entradas) => {
+      aLaVista = entradas[entradas.length - 1].isIntersecting;
+      ajustar();
+    });
+
+    new ResizeObserver(medir).observe(titulo);
+    window.addEventListener('resize', medir);
+    quieto.addEventListener?.('change', ajustar);
+    forzado.addEventListener?.('change', ajustar);
+
+    // Si el sistema le quita la tarjeta gráfica a la página, vuelve el mármol
+    // quieto; cuando se la devuelve, el humo.
+    lienzo.addEventListener('webglcontextlost', (evento) => {
+      evento.preventDefault();
+      programa = null;
+      parar();
+      titulo.classList.remove('con-humo');
+    });
+    lienzo.addEventListener('webglcontextrestored', ajustar);
+
+    // Empieza cuando la página ya no tiene nada más urgente que hacer.
+    const empezar = () => vista.observe(titulo);
+    if ('requestIdleCallback' in window) requestIdleCallback(empezar, { timeout: 2000 });
+    else setTimeout(empezar, 200);
+  }
+</script>
+
 <style>
   .portada {
     position: relative;
@@ -116,20 +343,67 @@ const medidas = portada
     /* las letras del libro son algo más estrechas que las de la fuente */
     transform: scaleX(0.88);
     transform-origin: left center;
-    /* el fondo solo pinta dentro de la caja: se agranda para que no se
-       corte la tilde, y se compensa con el margen */
-    padding-block: 0.06em;
-    margin-block: -0.1em -0.06em;
+    /* compensa lo que crece la caja del texto (abajo) */
+    margin-block: -0.14em -0.06em;
   }
 
-  /* Mármol: marfil con vetas grises muy tenues, recortado con la forma
-     de las letras. El dibujo crece con el tamaño del texto. */
+  /* El mármol solo pinta dentro de esta caja: se agranda, sobre todo hacia
+     arriba, para que la tilde quepa entera. */
+  .titulo__texto {
+    display: block;
+    padding-block: 0.1em 0.06em;
+  }
+
+  /* Mármol quieto: marfil con vetas de humo gris muy tenues, recortado con la
+     forma de las letras. La imagen se ajusta al alto de la caja, igual que
+     el lienzo que después la anima. */
   @supports ((-webkit-background-clip: text) or (background-clip: text)) {
     h1 {
-      background: var(--marmol) 50% 40% / 5em auto var(--marfil);
+      background: var(--marmol) 0 0 / auto 100% no-repeat var(--marfil);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
+    }
+  }
+
+  /* Mármol vivo: cuando el guion de abajo logra arrancar, el humo se pinta
+     en un lienzo detrás del texto. El texto pasa a ser blanco sobre el color
+     de la página y se mezcla quedándose con lo más oscuro: dentro de las
+     letras gana el humo y fuera, el fondo. Así el título sigue siendo texto
+     de verdad y el recorte es tan nítido como las letras. */
+  .titulo__humo {
+    display: none;
+  }
+
+  @media screen {
+    .con-humo {
+      isolation: isolate;
+      background: none;
+    }
+
+    /* La caja del título, ahora opaca, se arrima a la línea de arriba (el
+       margen negativo): esa línea queda siempre por encima. */
+    .portada__texto > .etiqueta {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* un píxel hacia dentro, para que el borde del lienzo no asome */
+    .con-humo .titulo__humo {
+      display: block;
+      position: absolute;
+      top: 1px;
+      left: 1px;
+      width: calc(100% - 2px);
+      height: calc(100% - 2px);
+    }
+
+    .con-humo .titulo__texto {
+      position: relative;
+      background: var(--fondo);
+      color: #fff;
+      -webkit-text-fill-color: #fff;
+      mix-blend-mode: darken;
     }
   }
 
@@ -137,6 +411,17 @@ const medidas = portada
     h1 {
       background: none;
       -webkit-text-fill-color: currentColor;
+    }
+
+    .con-humo .titulo__humo {
+      display: none;
+    }
+
+    .con-humo .titulo__texto {
+      background: none;
+      color: inherit;
+      -webkit-text-fill-color: currentColor;
+      mix-blend-mode: normal;
     }
   }
 
