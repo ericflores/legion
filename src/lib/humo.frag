@@ -1,31 +1,28 @@
-// Humo del título: vetas de mármol que suben y se enroscan despacio.
+// Humo del título: humo denso, como el de un cigarrillo, que sube muy despacio
+// por delante de las letras de "LEGIÓN".
 //
-// Es el dibujo de las letras de "LEGIÓN". Lo pinta el navegador con WebGL
-// (ver Portada.astro) y, congelado en el primer instante, es también la imagen
-// fija src/assets/marmol.webp que se ve antes de que arranque la animación o
-// cuando no puede haberla. Después de tocar este archivo hay que regenerarla
-// con "npm run marmol".
-#extension GL_OES_standard_derivatives : enable
+// Lo pinta el navegador con WebGL (ver Portada.astro) y, congelado en el primer
+// instante, es también la imagen fija src/assets/marmol.webp que se ve antes de
+// que arranque la animación o cuando no puede haberla. Después de tocar este
+// archivo hay que regenerarla con "npm run marmol".
+//
+// Cómo está hecho: una mancha de ruido suave (la masa de humo) se arrastra por
+// una corriente de remolinos, que la estira en velos y hebras como hace el
+// aire con el humo de verdad. La mancha sube; la corriente casi no se mueve.
 precision highp float;
 
 uniform vec2 u_origen; // dónde empieza el lienzo dentro de la caja del título, en píxeles del lienzo
 uniform vec2 u_escala; // de píxeles del lienzo a unidades del dibujo (1 = alto de la caja)
-uniform float u_px; // lo que mide un píxel del lienzo en unidades del dibujo
 uniform float u_t; // segundos de animación
 
-const vec3 MARFIL = vec3(0.957, 0.925, 0.851); // el mismo de --marfil
-const vec3 HUMO = vec3(0.36, 0.34, 0.32);
-const float FUERZA = 1.45; // cuánto se marcan las vetas
-const float SUBIDA = 0.045; // velocidad de subida: recorre el alto del título en medio minuto
+const vec3 MARFIL = vec3(0.957, 0.925, 0.851); // las letras: el mismo de --marfil
+const vec3 HUMO = vec3(0.36, 0.36, 0.37); // gris del humo más espeso
+const float FUERZA = 0.40; // cuánto llega a velar las letras el humo (0 = nada)
+const float SUBIDA = 0.018; // velocidad de subida: recorre el alto del título en un minuto, más o menos
+const float CUBRE = 0.05; // cuánta superficie ocupa el humo (más alto = más humo)
 
 // Números al azar a partir de una posición. Sin senos: así sale el mismo
 // dibujo en todas las tarjetas gráficas.
-float azar(vec2 p) {
-  vec3 q = fract(vec3(p.xyx) * 0.1031);
-  q += dot(q, q.yzx + 33.33);
-  return fract((q.x + q.y) * q.z);
-}
-
 vec2 azar2(vec2 p) {
   vec3 q = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
   q += dot(q, q.yzx + 33.33);
@@ -52,75 +49,45 @@ vec3 ruido(vec2 p) {
   );
 }
 
-float campana(float x) {
-  return exp(-x * x);
-}
-
-// Un haz de humo por cada franja: un hilo principal, dos compañeros que se
-// juntan y se abren con la corriente, y un velo que se difumina hacia un lado.
-//   fase: coordenada que cruza las vetas (hay una en cada número entero)
-//   pend: cuánto cambia la fase por unidad de dibujo (da el grosor real)
-float haz(float fase, float pend, vec2 r, float semilla, float grosor) {
-  float id = floor(fase + 0.5);
-  float lado = fase - id;
-  float h1 = azar(vec2(id, 1.7 + semilla));
-  float h2 = azar(vec2(id, 5.3 + semilla));
-  float h3 = azar(vec2(id, 9.1 + semilla));
-
-  // a medio camino entre dos vetas no queda nada de ninguna
-  float borde = 1.0 - smoothstep(0.4, 0.5, abs(lado));
-  // unas difuminan hacia un lado y otras hacia el otro
-  lado *= h3 > 0.5 ? 1.0 : -1.0;
-  // cada veta aparece y se desvanece a lo largo de su recorrido
-  float vida = smoothstep(-0.30, 0.22, ruido(r * 0.85 + 31.0 * vec2(h1, h2) + semilla).x);
-  // pocas vetas marcadas y muchas tenues
-  float peso = mix(0.22, 1.0, h1 * h1) * vida * borde;
-
-  // un hilo nunca es más fino que el píxel: en su lugar se aclara
-  float minimo = 0.75 * u_px;
-  float w0 = grosor * 0.0050 * (0.55 + 0.9 * h2);
-  float w1 = grosor * 0.0030;
-  float w2 = grosor * 0.0024;
-  float e0 = max(w0, minimo), e1 = max(w1, minimo), e2 = max(w2, minimo);
-  float hilo0 = campana(lado / (e0 * pend)) * (w0 / e0);
-  float hilo1 = campana((lado - 0.05 - 0.09 * h3) / (e1 * pend)) * (w1 / e1);
-  float hilo2 = campana((lado + 0.04 + 0.07 * h2) / (e2 * pend)) * (w2 / e2);
-
-  float velo = lado >= 0.0 ? pow(clamp(1.0 - lado / 0.45, 0.0, 1.0), 3.0) : campana(lado / (2.5 * e0 * pend));
-
-  return peso * (0.52 * hilo0 + 0.28 * hilo1 + 0.20 * hilo2 + (0.14 + 0.06 * h3) * velo);
-}
+// cada escala de ruido va girada respecto a la anterior, y es el doble de fina
+const mat2 GIRO = mat2(1.624, 1.218, -1.218, 1.624);
 
 void main() {
   vec2 p = (gl_FragCoord.xy + u_origen) * u_escala;
   float t = u_t;
 
-  // el dibujo entero sube despacio
-  vec2 r = p * 1.45 + vec2(4.1, 2.3);
-  r.y -= SUBIDA * t;
+  // La corriente. Unos remolinos altos y estrechos, que hacen subir el humo
+  // en columnas que se mecen, y otros más pequeños que lo enroscan. Cada
+  // punto se lleva hacia atrás por ella unos cuantos pasos; siempre en la
+  // dirección en que el ruido no cambia, para que la corriente ni amontone ni
+  // separe el humo: solo lo estira y lo dobla.
+  const vec2 COLUMNAS = vec2(1.3, 0.715);
+  vec2 q = p + vec2(3.7, 1.9);
+  for (int paso = 0; paso < 4; paso++) {
+    vec3 a = ruido(q * COLUMNAS + vec2(0.0, -0.004 * t));
+    vec3 b = ruido(q * 3.1 + vec2(5.2 + 0.003 * t, 1.3 - 0.009 * t));
+    q -= 0.18 * (vec2(a.z * 0.66, -a.y * 1.2) + 0.22 * vec2(b.z, -b.y));
+  }
 
-  // Remolinos que lo arrastran: grandes y perezosos primero, luego más finos.
-  // Cada uno empuja en la dirección en que el ruido no cambia, de modo que la
-  // corriente ni amontona ni separa las vetas: solo las dobla, como hace el
-  // aire con el humo. Suben más despacio que el dibujo, que al atravesarlos
-  // va cambiando de forma.
-  vec3 a = ruido(r * 0.72 + vec2(0.0, 0.016 * t));
-  r += 0.52 * vec2(a.z, -a.y);
-  vec3 b = ruido(r * 1.65 + vec2(0.011 * t, 0.029 * t) + 19.0);
-  r += 0.17 * vec2(b.z, -b.y);
-  vec3 c = ruido(r * 3.7 + vec2(-0.019 * t, 0.048 * t) + 41.0);
-  r += 0.034 * vec2(c.z, -c.y);
+  // La masa de humo: ruido de varias escalas sobre el dibujo ya arrastrado.
+  // Sube entera, y lo más fino un poco más deprisa que lo grueso.
+  float masa = 0.0, cuerpo = 0.0, peso = 0.5;
+  vec2 s = q * 3.4;
+  vec2 sube = vec2(0.0, -SUBIDA * 3.4 * t);
+  for (int escala = 0; escala < 4; escala++) {
+    masa += peso * ruido(s + sube * (1.0 + 0.25 * float(escala))).x;
+    if (escala == 1) cuerpo = masa;
+    s = GIRO * s + 11.7;
+    sube = GIRO * sube;
+    peso *= 0.55;
+  }
 
-  // franjas inclinadas sobre el dibujo ya deformado: cada una es una veta
-  float fase = dot(r, vec2(0.93, 0.36)) * 3.3 + 0.9 * a.x;
-  float pend = max(length(vec2(dFdx(fase), dFdy(fase)) / u_escala), 0.6);
+  // El humo pasa por delante de las letras: donde hay, las vela de gris, más
+  // cuanto más espeso; donde no, queda el marfil limpio. Las hebras salen de
+  // la masa entera y, detrás, una bruma desenfocada de sus escalas gruesas.
+  float espeso = max(masa + CUBRE, 0.0);
+  float velo = 1.0 - exp(-5.0 * espeso * espeso / (espeso + 0.06));
+  velo = 1.0 - (1.0 - velo) * (1.0 - 0.40 * smoothstep(-0.10, 0.22, cuerpo));
 
-  float alfa = haz(fase, pend, r, 0.0, 1.0);
-  // hebras más finas entre las vetas
-  alfa += 0.5 * haz(fase * 2.37 + 0.31, pend * 2.37, r, 13.0, 0.6);
-  alfa *= FUERZA * (0.85 + 0.5 * c.x);
-  // y una bruma muy leve
-  alfa += 0.045 * smoothstep(-0.25, 0.45, b.x + 0.6 * a.x);
-
-  gl_FragColor = vec4(mix(MARFIL, HUMO, clamp(alfa, 0.0, 1.0)), 1.0);
+  gl_FragColor = vec4(mix(MARFIL, HUMO, FUERZA * velo), 1.0);
 }

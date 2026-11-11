@@ -139,9 +139,9 @@ npm run build    # genera el sitio en dist/
   la de error 404.
 - `.pages.yml` — los formularios del editor visual. Si se añade un campo en
   `src/content.config.ts`, hay que añadirlo también aquí.
-- `src/lib/humo.frag` — el humo que recorre las letras del título (WebGL).
-  Al principio del archivo están su velocidad (`SUBIDA`) y lo que se marcan
-  las vetas (`FUERZA`). Después de tocarlo hay que ejecutar `npm run marmol`
-  (necesita Chrome o Chromium): regenera `src/assets/marmol.webp`, la imagen
-  fija que se ve mientras carga la página y en los navegadores que no pueden
-  animarlo.
+- `src/lib/humo.frag` — el humo que sube por las letras del título (WebGL).
+  Al principio del archivo están su velocidad (`SUBIDA`), cuánto vela las
+  letras (`FUERZA`) y cuánto humo hay (`CUBRE`). Después de tocarlo hay que
+  ejecutar `npm run marmol` (necesita Chrome o Chromium): regenera
+  `src/assets/marmol.webp`, la imagen fija que se ve mientras carga la página
+  y en los navegadores que no pueden animarlo.

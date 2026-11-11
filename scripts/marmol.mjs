@@ -1,7 +1,7 @@
 // Dibuja el primer instante del humo del título y lo guarda como imagen fija
 // (src/assets/marmol.webp).
 //
-// Las vetas del título se animan con WebGL (src/lib/humo.frag). Esta imagen es
+// El humo del título se anima con WebGL (src/lib/humo.frag). Esta imagen es
 // ese mismo dibujo, quieto: lo que se ve mientras carga la página y lo único
 // que se ve si el navegador no puede animarlo o el visitante pidió menos
 // movimiento. Como sale del mismo código, al arrancar la animación no se nota
@@ -21,7 +21,7 @@ const destino = new URL('src/assets/marmol.webp', raiz).pathname;
 const sombreador = readFileSync(new URL('src/lib/humo.frag', raiz), 'utf8').replace(/\/\/.*$/gm, '');
 
 // El título se dibuja estrechado (scaleX en Portada.astro) y la imagen con él:
-// se genera ensanchada en la misma proporción para que las vetas no se deformen.
+// se genera ensanchada en la misma proporción para que el humo no se deforme.
 const portada = readFileSync(new URL('src/components/Portada.astro', raiz), 'utf8');
 const estrecho = Number(portada.match(/scaleX\(([\d.]+)\)/)?.[1]);
 if (!estrecho) throw new Error('No encuentro el scaleX del título en src/components/Portada.astro');
@@ -37,7 +37,7 @@ function pintar({ sombreador, ancho, alto, estrecho }) {
   lienzo.width = ancho;
   lienzo.height = alto;
   const gl = lienzo.getContext('webgl', { alpha: false, antialias: false, preserveDrawingBuffer: true });
-  if (!gl || !gl.getExtension('OES_standard_derivatives')) throw new Error('Este Chrome no tiene WebGL disponible');
+  if (!gl) throw new Error('Este Chrome no tiene WebGL disponible');
   const compilar = (tipo, texto) => {
     const s = gl.createShader(tipo);
     gl.shaderSource(s, texto);
@@ -59,7 +59,6 @@ function pintar({ sombreador, ancho, alto, estrecho }) {
   gl.viewport(0, 0, ancho, alto);
   gl.uniform2f(gl.getUniformLocation(programa, 'u_origen'), 0, 0);
   gl.uniform2f(gl.getUniformLocation(programa, 'u_escala'), estrecho / alto, 1 / alto);
-  gl.uniform1f(gl.getUniformLocation(programa, 'u_px'), 1 / alto);
   gl.uniform1f(gl.getUniformLocation(programa, 'u_t'), 0);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
   return lienzo.toDataURL('image/png');

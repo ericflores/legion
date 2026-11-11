@@ -4,9 +4,9 @@ import type { CollectionEntry } from 'astro:content';
 import { imagen } from '../lib/imagenes';
 import { seccion } from '../lib/sitio';
 import Flecha from './Flecha.astro';
-// Mármol de las letras del título: el primer instante del humo, quieto. Lo
-// genera "npm run marmol" a partir de src/lib/humo.frag, el mismo dibujo que
-// luego se anima (ver el guion al final de este archivo).
+// Humo de las letras del título: su primer instante, quieto. Lo genera
+// "npm run marmol" a partir de src/lib/humo.frag, el mismo dibujo que luego
+// se anima (ver el guion más abajo).
 import marmol from '../assets/marmol.webp';
 
 interface Props {
@@ -81,14 +81,15 @@ const medidas = portada
 </section>
 
 <script>
-  // Humo del título: las vetas de mármol de "LEGIÓN" suben y se enroscan muy
-  // despacio. El dibujo está en src/lib/humo.frag; esto lo pone en marcha.
+  // Humo del título: un humo denso sube muy despacio por delante de las
+  // letras de "LEGIÓN". El dibujo está en src/lib/humo.frag; esto lo pone en
+  // marcha.
   //
   // Es un adorno y nunca estorba: si el navegador no puede (no hay WebGL, o
   // dibujaría sin tarjeta gráfica), si el visitante pidió menos movimiento o
-  // usa colores forzados, se queda el mármol quieto de siempre. Solo trabaja
-  // mientras el título está a la vista y se acomoda a lo que el equipo puede
-  // pintar con holgura.
+  // usa colores forzados, se queda el humo quieto de la imagen fija. Solo
+  // trabaja mientras el título está a la vista y se acomoda a lo que el
+  // equipo puede pintar con holgura.
   import fuente from '../lib/humo.frag?raw';
 
   const titulo = document.querySelector<HTMLElement>('[data-humo]');
@@ -99,11 +100,11 @@ const medidas = portada
     const forzado = matchMedia('(forced-colors: active)');
     const ARRANQUE = 2; // segundos que tarda en tomar velocidad
     const PRESUPUESTO = 8; // milisegundos que puede costar pintar un cuadro
-    const DENSIDAD_MINIMA = 0.75; // píxeles del lienzo por píxel de la página; con menos, mejor nada
+    const DENSIDAD_MINIMA = 0.5; // píxeles del lienzo por píxel de la página; con menos, mejor nada
 
     let gl: WebGLRenderingContext | null = null;
     let programa: WebGLProgram | null = null;
-    let variables: Record<'origen' | 'escala' | 'px' | 't', WebGLUniformLocation | null> | undefined;
+    let variables: Record<'origen' | 'escala' | 't', WebGLUniformLocation | null> | undefined;
     let imposible = false; // este equipo no puede: no se insiste
     let aLaVista = false;
     let bucle = 0;
@@ -133,7 +134,7 @@ const medidas = portada
       bucle = 0;
     };
 
-    // Vuelve al mármol quieto. Si es porque el contexto se perdió, puede
+    // Vuelve al humo quieto. Si es porque el contexto se perdió, puede
     // volver; cualquier otro motivo no tiene arreglo: no se insiste y se
     // suelta lo que se hubiera reservado.
     const rendirse = () => {
@@ -157,9 +158,7 @@ const medidas = portada
         failIfMajorPerformanceCaveat: true,
       });
       const fino = gl?.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT);
-      if (!gl || porSoftware(gl) || !gl.getExtension('OES_standard_derivatives') || !fino || fino.precision < 23) {
-        return rendirse();
-      }
+      if (!gl || porSoftware(gl) || !fino || fino.precision < 23) return rendirse();
       const nuevo = gl.createProgram();
       const vertices = compilar(gl.VERTEX_SHADER, 'attribute vec2 a; void main() { gl_Position = vec4(a, 0.0, 1.0); }');
       // sin comentarios: hay navegadores que solo admiten ASCII en el código
@@ -180,7 +179,6 @@ const medidas = portada
       variables = {
         origen: gl.getUniformLocation(nuevo, 'u_origen'),
         escala: gl.getUniformLocation(nuevo, 'u_escala'),
-        px: gl.getUniformLocation(nuevo, 'u_px'),
         t: gl.getUniformLocation(nuevo, 'u_t'),
       };
       programa = nuevo;
@@ -204,7 +202,8 @@ const medidas = portada
       if (!(ancho > 1 && alto > 1)) return;
       // el título se dibuja estrechado: el lienzo tiene los píxeles que de verdad se ven
       const estrecho = new DOMMatrixReadOnly(estilo.transform).a || 1;
-      const densidad = Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(tope / (ancho * estrecho * alto)));
+      // el humo es suave: no gana nada con más de píxel y medio por píxel de página
+      const densidad = Math.min(window.devicePixelRatio || 1, 1.5, Math.sqrt(tope / (ancho * estrecho * alto)));
       if (densidad < DENSIDAD_MINIMA) {
         rendirse();
         return;
@@ -219,14 +218,13 @@ const medidas = portada
       gl.viewport(0, 0, w, h);
       gl.uniform2f(variables.origen, w / ancho, h / alto);
       gl.uniform2f(variables.escala, (estrecho * ancho) / (w * caja), alto / (h * caja));
-      gl.uniform1f(variables.px, alto / (h * caja));
       dibujar();
     };
 
     // Cronometra lo que cuesta pintar un cuadro (leer un píxel obliga a
     // esperar a que la tarjeta termine). Si se pasa del presupuesto, el
     // lienzo se queda con los píxeles que sí caben en él: el humo sale algo
-    // más suave y las letras igual de nítidas. Si ni así, mármol quieto.
+    // más suave y las letras igual de nítidas. Si ni así, humo quieto.
     const cronometrar = () => {
       if (!gl || !programa) return;
       const pixel = new Uint8Array(4);
@@ -287,8 +285,8 @@ const medidas = portada
     quieto.addEventListener?.('change', ajustar);
     forzado.addEventListener?.('change', ajustar);
 
-    // Si el sistema le quita la tarjeta gráfica a la página, vuelve el mármol
-    // quieto; cuando se la devuelve, el humo.
+    // Si el sistema le quita la tarjeta gráfica a la página, vuelve la imagen
+    // fija; cuando se la devuelve, el humo en movimiento.
     lienzo.addEventListener('webglcontextlost', (evento) => {
       evento.preventDefault();
       programa = null;
@@ -347,14 +345,14 @@ const medidas = portada
     margin-block: -0.14em -0.06em;
   }
 
-  /* El mármol solo pinta dentro de esta caja: se agranda, sobre todo hacia
+  /* El humo solo pinta dentro de esta caja: se agranda, sobre todo hacia
      arriba, para que la tilde quepa entera. */
   .titulo__texto {
     display: block;
     padding-block: 0.1em 0.06em;
   }
 
-  /* Mármol quieto: marfil con vetas de humo gris muy tenues, recortado con la
+  /* Humo quieto: marfil velado por un humo gris suave, recortado con la
      forma de las letras. La imagen se ajusta al alto de la caja, igual que
      el lienzo que después la anima. */
   @supports ((-webkit-background-clip: text) or (background-clip: text)) {
@@ -366,7 +364,7 @@ const medidas = portada
     }
   }
 
-  /* Mármol vivo: cuando el guion de abajo logra arrancar, el humo se pinta
+  /* Humo vivo: cuando el guion de arriba logra arrancar, el humo se pinta
      en un lienzo detrás del texto. El texto pasa a ser blanco sobre el color
      de la página y se mezcla quedándose con lo más oscuro: dentro de las
      letras gana el humo y fuera, el fondo. Así el título sigue siendo texto
