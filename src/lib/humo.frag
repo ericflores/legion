@@ -17,8 +17,8 @@ uniform float u_t; // segundos de animación
 
 const vec3 MARFIL = vec3(0.957, 0.925, 0.851); // las letras: el mismo de --marfil
 const vec3 HUMO = vec3(0.36, 0.36, 0.37); // gris del humo más espeso
-const float FUERZA = 0.50; // cuánto llega a velar las letras el humo (0 = nada)
-const float SUBIDA = 0.018; // velocidad de subida: recorre el alto del título en un minuto, más o menos
+const float FUERZA = 0.60; // cuánto llega a velar las letras el humo (0 = nada)
+const float SUBIDA = 0.024; // velocidad de subida: recorre el alto del título en unos 40 segundos
 const float CUBRE = 0.05; // cuánta superficie ocupa el humo (más alto = más humo)
 
 // Números al azar a partir de una posición. Sin senos: así sale el mismo
