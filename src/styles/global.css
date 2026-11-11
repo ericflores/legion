@@ -18,6 +18,7 @@
   --acento: #cbb68f; /* 9.5:1 sobre el fondo */
   --acento-claro: #e0cfab;
   --sobre-acento: #0b0b0f;
+  --marfil: #f4ecd9; /* el blanco cálido de las letras del título */
   --verde: #83a892; /* segundo acento: se usa una sola vez, en la nota del autor */
   --luz: #28262a; /* el charco de luz bajo el libro */
   --lomo: #353238; /* filo del libro y borde de la nota */
@@ -25,6 +26,9 @@
 
   /* Tipografía: una serif editorial que dialoga con la portada
      y una sans muy legible para lectura e interfaz */
+  /* Rótulo: solo para el nombre del libro. Es la más parecida a la de la
+     portada (una romana condensada y gruesa). */
+  --fuente-rotulo: 'Libre Caslon Condensed', 'Cormorant Garamond Variable', Georgia, 'Times New Roman', serif;
   --fuente-titulos: 'Cormorant Garamond Variable', 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   --fuente-texto: 'Manrope Variable', Manrope, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
