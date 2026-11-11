@@ -12,17 +12,17 @@ const { data } = await unico('librerias');
       <ul class="librerias" role="list">
         {data.lista.map((l) => (
           <li class="libreria">
-            <div>
-              <h3>{l.nombre}</h3>
-              {l.lugar && <p class="libreria__lugar">{l.lugar}</p>}
-            </div>
-            {l.enlace ? (
-              <EnlaceExterno href={l.enlace}>
-                Comprar en línea<span class="solo-lectores"> en {l.nombre}</span>
-              </EnlaceExterno>
-            ) : (
-              <span class="libreria__tienda">En tienda</span>
-            )}
+            <h3>{l.nombre}</h3>
+            {l.lugar && <p class="libreria__lugar">{l.lugar}</p>}
+            <span class="libreria__accion">
+              {l.enlace ? (
+                <EnlaceExterno href={l.enlace}>
+                  Comprar en línea<span class="solo-lectores"> en {l.nombre}</span>
+                </EnlaceExterno>
+              ) : (
+                <span class="libreria__tienda">En tienda</span>
+              )}
+            </span>
           </li>
         ))}
       </ul>
@@ -40,19 +40,47 @@ const { data } = await unico('librerias');
     border-top: 1px solid var(--linea-fuerte);
   }
 
+  /* En columnas estrechas: el nombre arriba, y debajo el lugar a la
+     izquierda y la acción a la derecha, siempre en el mismo sitio. */
   .libreria {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'nombre nombre'
+      'lugar accion';
     align-items: center;
-    justify-content: space-between;
-    gap: 0.25rem 1.5rem;
-    padding-block: 1.1rem;
+    column-gap: 1.5rem;
+    padding-block: 1.1rem 0.6rem;
     border-bottom: 1px solid var(--linea);
   }
 
+  .libreria h3 {
+    grid-area: nombre;
+  }
+
   .libreria__lugar {
+    grid-area: lugar;
     font-size: var(--t-pequeno);
     color: var(--texto-suave);
+  }
+
+  .libreria__accion {
+    grid-area: accion;
+    display: inline-flex;
+    align-items: center;
+    justify-self: end;
+    min-height: 2.75rem;
+  }
+
+  /* Con espacio de sobra: nombre y lugar a la izquierda, acción centrada
+     a la derecha, todo en una fila. */
+  @container (min-width: 30rem) {
+    .libreria {
+      grid-template-areas:
+        'nombre accion'
+        'lugar accion';
+      padding-block: 1.1rem;
+    }
   }
 
   .libreria__tienda {
