@@ -60,6 +60,8 @@ function pintar({ sombreador, ancho, alto, estrecho }) {
   gl.uniform2f(gl.getUniformLocation(programa, 'u_origen'), 0, 0);
   gl.uniform2f(gl.getUniformLocation(programa, 'u_escala'), estrecho / alto, 1 / alto);
   gl.uniform1f(gl.getUniformLocation(programa, 'u_t'), 0);
+  gl.uniform2f(gl.getUniformLocation(programa, 'u_semilla'), 0, 0);
+  gl.uniform1f(gl.getUniformLocation(programa, 'u_mezcla'), 0);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
   return lienzo.toDataURL('image/png');
 }

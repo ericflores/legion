@@ -99,12 +99,15 @@ const medidas = portada
     const quieto = matchMedia('(prefers-reduced-motion: reduce)');
     const forzado = matchMedia('(forced-colors: active)');
     const ARRANQUE = 2; // segundos que tarda en tomar velocidad
+    const FUNDIDO = 2.5; // segundos en pasar del humo de la imagen fija al de esta visita
+    // un humo distinto en cada visita: otro rincón del mismo dibujo
+    const semilla = [20 + Math.random() * 60, 20 + Math.random() * 60];
     const PRESUPUESTO = 8; // milisegundos que puede costar pintar un cuadro
     const DENSIDAD_MINIMA = 0.5; // píxeles del lienzo por píxel de la página; con menos, mejor nada
 
     let gl: WebGLRenderingContext | null = null;
     let programa: WebGLProgram | null = null;
-    let variables: Record<'origen' | 'escala' | 't', WebGLUniformLocation | null> | undefined;
+    let variables: Record<'origen' | 'escala' | 't' | 'semilla' | 'mezcla', WebGLUniformLocation | null> | undefined;
     let imposible = false; // este equipo no puede: no se insiste
     let aLaVista = false;
     let bucle = 0;
@@ -180,6 +183,8 @@ const medidas = portada
         origen: gl.getUniformLocation(nuevo, 'u_origen'),
         escala: gl.getUniformLocation(nuevo, 'u_escala'),
         t: gl.getUniformLocation(nuevo, 'u_t'),
+        semilla: gl.getUniformLocation(nuevo, 'u_semilla'),
+        mezcla: gl.getUniformLocation(nuevo, 'u_mezcla'),
       };
       programa = nuevo;
       return true;
@@ -189,6 +194,8 @@ const medidas = portada
       if (!gl || !programa || !variables) return;
       // arranca desde el reposo y va tomando velocidad
       gl.uniform1f(variables.t, reloj - ARRANQUE * (1 - Math.exp(-reloj / ARRANQUE)));
+      const avance = Math.min(reloj / FUNDIDO, 1);
+      gl.uniform1f(variables.mezcla, avance * avance * (3 - 2 * avance));
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
 
@@ -217,6 +224,7 @@ const medidas = portada
       const caja = alto + 2;
       gl.viewport(0, 0, w, h);
       gl.uniform2f(variables.origen, w / ancho, h / alto);
+      gl.uniform2f(variables.semilla, semilla[0], semilla[1]);
       gl.uniform2f(variables.escala, (estrecho * ancho) / (w * caja), alto / (h * caja));
       dibujar();
     };
@@ -250,8 +258,8 @@ const medidas = portada
       anterior = ahora;
       reloj += Math.min(paso, 100) / 1000;
       dibujar();
-      // con el dibujo ya rodado (los primeros cuadros cargan con la preparación)
-      if (++cuadros === 10) cronometrar();
+      // con el dibujo ya rodado y pasado el fundido, que cuesta el doble
+      if (++cuadros === 100) cronometrar();
     };
 
     // Deja el humo como toca según lo que pase en cada momento.
