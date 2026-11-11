@@ -12,6 +12,11 @@ const { sitio } = Astro.props;
 const portada = imagen(sitio.portada);
 // Tamaños a servir: nunca más anchos que la imagen original.
 const anchos = portada ? [...[360, 540, 720, 1080].filter((a) => a < portada.width), portada.width] : [];
+// La portada nunca se estira más allá de su tamaño real (se vería borrosa) y,
+// cuando va junto al texto, tampoco se sale por debajo de la pantalla.
+const medidas = portada
+  ? `--proporcion: ${(portada.width / portada.height).toFixed(4)}; --ancho-natural: ${portada.format === 'svg' ? '100vw' : `${portada.width}px`}`
+  : undefined;
 ---
 
 <section class="portada" id="inicio" aria-labelledby="titulo-sitio">
@@ -41,12 +46,12 @@ const anchos = portada ? [...[360, 540, 720, 1080].filter((a) => a < portada.wid
 
     {
       portada && (
-        <figure class="portada__imagen">
+        <figure class="portada__imagen" style={medidas}>
           <Image
             src={portada}
             alt={sitio.portada_descripcion}
             widths={anchos}
-            sizes="(min-width: 30rem) 27rem, 80vw"
+            sizes="(min-width: 42rem) 27rem, 80vw"
             loading="eager"
             fetchpriority="high"
           />
@@ -73,10 +78,14 @@ const anchos = portada ? [...[360, 540, 720, 1080].filter((a) => a < portada.wid
     display: grid;
     gap: 1.25rem;
     justify-items: start;
+    /* el título se mide contra el ancho de esta columna (unidades cqi) */
+    container-type: inline-size;
   }
 
   h1 {
     font-size: var(--t-h1);
+    /* tan grande como quepa en la columna, sin comerse una pantalla baja */
+    font-size: clamp(3.5rem, min(25cqi, 22svh), 9rem);
     font-weight: 600;
     line-height: 0.9;
     letter-spacing: 0.035em;
@@ -100,9 +109,11 @@ const anchos = portada ? [...[360, 540, 720, 1080].filter((a) => a < portada.wid
     color: var(--texto-suave);
   }
 
-  .portada__gancho span {
-    display: block;
-    text-wrap: balance;
+  /* una frase por línea solo cuando cada una cabe entera */
+  @container (min-width: 30rem) {
+    .portada__gancho span {
+      display: block;
+    }
   }
 
   .portada__acciones {
@@ -125,7 +136,7 @@ const anchos = portada ? [...[360, 540, 720, 1080].filter((a) => a < portada.wid
   .portada__imagen {
     position: relative;
     justify-self: center;
-    width: min(80%, 27rem);
+    width: min(80%, 27rem, var(--ancho-natural, 27rem));
   }
 
   /* halo cálido detrás del libro */
@@ -145,13 +156,54 @@ const anchos = portada ? [...[360, 540, 720, 1080].filter((a) => a < portada.wid
       0 2rem 3.5rem rgb(0 0 0 / 0.6);
   }
 
-  @media (min-width: 60rem) {
+  /* Tableta y teléfono horizontal: texto y libro lado a lado */
+  @media (min-width: 42rem) {
     .portada__rejilla {
-      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
     }
 
     .portada__imagen {
       justify-self: end;
+      width: min(100%, 27rem, var(--ancho-natural, 27rem));
+      width: min(
+        100%,
+        27rem,
+        var(--ancho-natural, 27rem),
+        max(11rem, (100svh - var(--alto-cabecera) - 9rem) * var(--proporcion, 0.65))
+      );
+    }
+  }
+
+  @media (min-width: 60rem) {
+    .portada__rejilla {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    }
+  }
+
+  /* Pantallas muy bajas (teléfono horizontal): todo más compacto */
+  @media (max-height: 30rem) and (min-width: 42rem) {
+    .portada {
+      padding-block: 1.5rem 2.5rem;
+    }
+
+    .portada__rejilla {
+      align-items: start;
+    }
+
+    .portada__texto {
+      gap: 0.75rem;
+    }
+
+    .portada__lema {
+      font-size: 1.5rem;
+    }
+
+    .portada__acciones {
+      margin-top: 0.25rem;
+    }
+
+    .portada__ficha {
+      margin-top: 0.5rem;
     }
   }
 </style>

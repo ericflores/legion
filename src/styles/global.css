@@ -51,6 +51,9 @@
 }
 
 html {
+  /* En monitores grandes todo el sitio crece en proporción (las medidas van
+     en rem): 16 px hasta 1600 px de ancho, ~21 px en 2560 y ~27 px en 4K. */
+  font-size: clamp(100%, 0.5rem + 0.5vw, 175%);
   scroll-padding-top: calc(var(--alto-cabecera) + 1rem);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
@@ -59,6 +62,13 @@ html {
 @media (prefers-reduced-motion: no-preference) {
   html {
     scroll-behavior: smooth;
+  }
+}
+
+/* En pantallas muy bajas la cabecera no se queda fija (ver Cabecera.astro) */
+@media (max-height: 30rem) {
+  html {
+    scroll-padding-top: 1rem;
   }
 }
 

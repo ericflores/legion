@@ -215,6 +215,13 @@ const { titulo } = Astro.props;
     }
   }
 
+  /* Teléfono horizontal: la cabecera fija ocuparía la quinta parte de la pantalla */
+  @media (max-height: 30rem) {
+    .cabecera {
+      position: static;
+    }
+  }
+
   @media (max-width: 30rem) {
     .cabecera__fila {
       column-gap: 0.75rem;
