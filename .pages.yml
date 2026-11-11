@@ -146,7 +146,6 @@ content:
     fields:
       - { name: etiqueta, label: Etiqueta, type: string, required: true }
       - { name: titular, label: Titular, type: string, required: true }
-      - { name: nota, label: Nota bajo la lista, type: string }
       - name: lista
         label: Librerías
         type: object

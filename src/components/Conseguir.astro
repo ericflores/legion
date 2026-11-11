@@ -48,12 +48,6 @@ const pedido = (correo: string) =>
       </ul>
     )
   }
-  <p class="librerias__nota">
-    {data.nota}{' '}
-    ¿No la encuentras cerca?{' '}
-    <a href={seccion('contacto')} data-motivo="Conseguir un ejemplar">Pídesela al autor</a>.
-  </p>
-
   {
     municipios.length > 0 && (
       <details class="directorio">
@@ -99,6 +93,11 @@ const pedido = (correo: string) =>
       </details>
     )
   }
+
+  <p class="librerias__nota">
+    ¿No la encuentras cerca?{' '}
+    <a href={seccion('contacto')} data-motivo="Conseguir un ejemplar">Pídesela al autor</a>.
+  </p>
 </Seccion>
 
 <style>

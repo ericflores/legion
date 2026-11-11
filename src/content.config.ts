@@ -79,7 +79,6 @@ const librerias = defineCollection({
   loader: unArchivo('librerias.yaml'),
   schema: z.object({
     ...encabezado,
-    nota: opcional(texto),
     lista: z
       .array(z.object({ nombre: texto, lugar: opcional(texto), enlace: opcional(enlace) }))
       .default([]),
