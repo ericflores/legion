@@ -1,0 +1,212 @@
+---
+import { getCollection, render } from 'astro:content';
+import { seccion } from '../lib/sitio';
+import EnlaceExterno from './EnlaceExterno.astro';
+import Flecha from './Flecha.astro';
+import Seccion from './Seccion.astro';
+
+interface Props {
+  etiqueta: string;
+  titular: string;
+  sinFechas: string;
+}
+const { etiqueta, titular, sinFechas } = Astro.props;
+
+// Las fechas del contenido son días de calendario (sin hora): se leen en UTC
+// para que "2026-12-19" sea siempre el 19, y "hoy" se calcula en Puerto Rico.
+const ZONA = 'America/Puerto_Rico';
+const diaISO = (f: Date) => f.toISOString().slice(0, 10);
+const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: ZONA }).format(new Date());
+const parte = (f: Date, opciones: Intl.DateTimeFormatOptions) =>
+  new Intl.DateTimeFormat('es-PR', { timeZone: 'UTC', ...opciones }).format(f);
+
+const proximos = (await getCollection('encuentros'))
+  .filter((e) => diaISO(e.data.fecha) >= hoy)
+  .sort((a, b) => a.data.fecha.getTime() - b.data.fecha.getTime());
+
+const eventos = await Promise.all(
+  proximos.map(async (e) => {
+    const { fecha, lugar, direccion, mapa } = e.data;
+    return {
+      ...e.data,
+      iso: diaISO(fecha),
+      dia: parte(fecha, { day: 'numeric' }),
+      mes: parte(fecha, { month: 'short' }).replace('.', ''),
+      anio: parte(fecha, { year: 'numeric' }),
+      fechaLarga: parte(fecha, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+      mapa:
+        mapa ??
+        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([lugar, direccion].filter(Boolean).join(', '))}`,
+      Detalle: (await render(e)).Content,
+      tieneDetalle: Boolean(e.body?.trim()),
+    };
+  }),
+);
+---
+
+<Seccion id="encuentros" etiqueta={etiqueta} titular={titular}>
+  <ul class="eventos" role="list" data-eventos>
+    {
+      eventos.map((e) => (
+        <li class="evento" data-fecha={e.iso}>
+          <time class="evento__fecha" datetime={e.iso}>
+            <span class="evento__dia" aria-hidden="true">
+              {e.dia}
+            </span>
+            <span class="evento__mes" aria-hidden="true">
+              {e.mes} {e.anio}
+            </span>
+            <span class="solo-lectores">{e.fechaLarga}</span>
+          </time>
+          <div class="evento__cuerpo">
+            <h3>{e.titulo}</h3>
+            <p class="evento__cuando">
+              <span class="evento__diasemana">{e.fechaLarga}</span>
+              {e.hora && <span> · {e.hora}</span>}
+            </p>
+            <p class="evento__donde">
+              <strong>{e.lugar}</strong>
+              {e.direccion && <span>{e.direccion}</span>}
+            </p>
+            {e.tieneDetalle && (
+              <div class="evento__detalle">
+                <e.Detalle />
+              </div>
+            )}
+            <div class="evento__acciones">
+              <EnlaceExterno href={e.mapa}>Cómo llegar</EnlaceExterno>
+              <a class="enlace" href={seccion('contacto')} data-motivo="Ventas y encuentros">
+                Pedir información
+                <Flecha tipo="abajo" />
+              </a>
+            </div>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="eventos__vacio" data-sin-eventos hidden={eventos.length > 0}>
+    {sinFechas}{' '}
+    <a href={seccion('contacto')} data-motivo="Invitar al autor">Invitar al autor</a>.
+  </p>
+</Seccion>
+
+<script>
+  // El sitio es estático: si pasa la fecha de un encuentro y nadie ha vuelto a
+  // publicar, se oculta aquí para no anunciar algo que ya ocurrió.
+  const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Puerto_Rico' }).format(new Date());
+  const lista = document.querySelector<HTMLElement>('[data-eventos]');
+  if (lista) {
+    const eventos = [...lista.querySelectorAll<HTMLElement>('[data-fecha]')];
+    for (const e of eventos) e.hidden = (e.dataset.fecha ?? '') < hoy;
+    if (eventos.every((e) => e.hidden)) {
+      lista.hidden = true;
+      document.querySelector<HTMLElement>('[data-sin-eventos]')?.removeAttribute('hidden');
+    }
+  }
+</script>
+
+<style>
+  .eventos {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .evento {
+    display: grid;
+    gap: 1.25rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    background: var(--superficie);
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+  }
+
+  .evento__fecha {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    color: var(--acento);
+  }
+
+  .evento__dia {
+    font-family: var(--fuente-titulos);
+    font-size: 3.5rem;
+    font-weight: 600;
+    line-height: 0.85;
+  }
+
+  .evento__mes {
+    font-size: var(--t-etiqueta);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .evento__cuerpo {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .evento__cuando {
+    font-size: var(--t-pequeno);
+    color: var(--texto);
+  }
+
+  .evento__diasemana::first-letter {
+    text-transform: uppercase;
+  }
+
+  .evento__diasemana {
+    display: inline-block; /* para que ::first-letter funcione */
+  }
+
+  .evento__donde {
+    display: grid;
+    font-size: var(--t-pequeno);
+    color: var(--texto-suave);
+  }
+
+  .evento__donde strong {
+    font-weight: 700;
+    color: var(--texto);
+  }
+
+  .evento__detalle {
+    font-size: var(--t-pequeno);
+    color: var(--texto-suave);
+  }
+
+  .evento__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.75rem;
+    margin-top: 0.25rem;
+  }
+
+  .eventos__vacio {
+    max-width: var(--lectura);
+    padding: 1.5rem;
+    border: 1px dashed var(--linea-fuerte);
+    border-radius: var(--radio);
+    color: var(--texto-suave);
+  }
+
+  .eventos__vacio a {
+    font-weight: 600;
+  }
+
+  @media (min-width: 36rem) {
+    .evento {
+      grid-template-columns: 6.5rem minmax(0, 1fr);
+      gap: 1.75rem;
+    }
+
+    .evento__fecha {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding-right: 1.25rem;
+      border-right: 1px solid var(--linea);
+    }
+  }
+</style>

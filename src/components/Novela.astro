@@ -1,0 +1,96 @@
+---
+import { render } from 'astro:content';
+import { unico } from '../lib/sitio';
+import Seccion from './Seccion.astro';
+
+const novela = await unico('novela');
+const universo = await unico('universo');
+const { Content: Sinopsis } = await render(novela);
+const { Content: Intro } = await render(universo);
+---
+
+<Seccion id="novela" etiqueta={novela.data.etiqueta} titular={novela.data.titular}>
+  <div class="prosa sinopsis">
+    <Sinopsis />
+  </div>
+  {
+    novela.data.cita && (
+      <blockquote class="cita">
+        <p>{novela.data.cita}</p>
+      </blockquote>
+    )
+  }
+</Seccion>
+
+<Seccion id="universo" etiqueta={universo.data.etiqueta} titular={universo.data.titular}>
+  <div class="prosa">
+    <Intro />
+  </div>
+  {
+    universo.data.datos.length > 0 && (
+      <dl class="datos">
+        {universo.data.datos.map((d) => (
+          <div>
+            <dt>{d.titulo}</dt>
+            <dd>{d.texto}</dd>
+          </div>
+        ))}
+      </dl>
+    )
+  }
+</Seccion>
+
+<style>
+  /* el primer párrafo de la sinopsis entra con más voz */
+  .sinopsis :global(p:first-child) {
+    font-size: var(--t-destacado);
+    line-height: 1.55;
+    color: var(--texto);
+  }
+
+  .cita {
+    max-width: var(--lectura);
+    margin-top: 2.75rem;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--acento);
+  }
+
+  .cita p {
+    font-family: var(--fuente-titulos);
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 1.875rem);
+    font-style: italic;
+    line-height: 1.3;
+    color: var(--texto);
+  }
+
+  .datos {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 2.75rem;
+  }
+
+  .datos > div {
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--linea-fuerte);
+  }
+
+  .datos dt {
+    font-family: var(--fuente-titulos);
+    font-size: var(--t-h3);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .datos dd {
+    margin-top: 0.6rem;
+    font-size: var(--t-pequeno);
+    color: var(--texto-suave);
+  }
+
+  @media (min-width: 40rem) {
+    .datos {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 2.5rem;
+    }
+  }
+</style>

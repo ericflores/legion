@@ -1,0 +1,152 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { imagen } from '../lib/imagenes';
+import { seccion } from '../lib/sitio';
+import Flecha from './Flecha.astro';
+
+interface Props {
+  sitio: CollectionEntry<'sitio'>['data'];
+}
+const { sitio } = Astro.props;
+const portada = imagen(sitio.portada);
+---
+
+<section class="portada" id="inicio" aria-labelledby="titulo-sitio">
+  <div class="contenedor portada__rejilla">
+    <div class="portada__texto">
+      <p class="etiqueta">{sitio.autor} · Novela</p>
+      <h1 id="titulo-sitio">{sitio.titulo}</h1>
+      <p class="portada__lema">{sitio.lema}</p>
+      {
+        sitio.gancho.length > 0 && (
+          <p class="portada__gancho">
+            {sitio.gancho.map((linea) => (
+              <span>{linea} </span>
+            ))}
+          </p>
+        )
+      }
+      <div class="portada__acciones">
+        <a class="boton boton--primario" href={seccion('conseguir')}>Dónde conseguirla</a>
+        <a class="enlace" href={seccion('novela')}>
+          Conoce la historia
+          <Flecha tipo="abajo" />
+        </a>
+      </div>
+      <p class="portada__ficha">{sitio.genero} · {sitio.editorial}</p>
+    </div>
+
+    {
+      portada && (
+        <figure class="portada__imagen">
+          <Image
+            src={portada}
+            alt={sitio.portada_descripcion}
+            widths={[480, 800, 1132]}
+            sizes="(min-width: 60rem) 46vw, 92vw"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </figure>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .portada {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(3rem, 2rem + 5vw, 6rem) clamp(3.5rem, 2rem + 6vw, 7rem);
+  }
+
+  .portada__rejilla {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 4rem);
+    align-items: center;
+  }
+
+  .portada__texto {
+    display: grid;
+    gap: 1.25rem;
+    justify-items: start;
+  }
+
+  h1 {
+    font-size: var(--t-h1);
+    font-weight: 600;
+    line-height: 0.9;
+    letter-spacing: 0.035em;
+    text-transform: uppercase;
+    /* compensa el interletrado para alinear ópticamente con el resto */
+    margin-left: -0.03em;
+  }
+
+  .portada__lema {
+    max-width: 24ch;
+    font-family: var(--fuente-titulos);
+    font-size: clamp(1.75rem, 1.2rem + 2.4vw, 2.5rem);
+    font-style: italic;
+    line-height: 1.15;
+    color: var(--acento);
+    text-wrap: balance;
+  }
+
+  .portada__gancho {
+    max-width: 34rem;
+    color: var(--texto-suave);
+  }
+
+  .portada__gancho span {
+    display: block;
+    text-wrap: balance;
+  }
+
+  .portada__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.75rem;
+    margin-top: 0.75rem;
+  }
+
+  .portada__ficha {
+    margin-top: 1.5rem;
+    font-size: var(--t-etiqueta);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+  }
+
+  .portada__imagen {
+    position: relative;
+    justify-self: center;
+    width: min(100%, 38rem);
+  }
+
+  /* halo cálido detrás del libro */
+  .portada__imagen::before {
+    content: '';
+    position: absolute;
+    inset: -18%;
+    z-index: -1;
+    background: radial-gradient(closest-side, rgb(203 182 143 / 0.16), transparent 72%);
+  }
+
+  .portada__imagen img {
+    width: 100%;
+    filter: drop-shadow(0 2rem 3rem rgb(0 0 0 / 0.55));
+  }
+
+  @media (min-width: 60rem) {
+    .portada__rejilla {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    }
+
+    .portada__imagen {
+      justify-self: end;
+    }
+  }
+</style>

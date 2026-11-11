@@ -1,0 +1,93 @@
+---
+import '@fontsource-variable/manrope';
+import '@fontsource-variable/cormorant-garamond';
+import '@fontsource-variable/cormorant-garamond/wght-italic.css';
+import '../styles/global.css';
+
+import { getImage } from 'astro:assets';
+import Cabecera from '../components/Cabecera.astro';
+import Pie from '../components/Pie.astro';
+import { imagen } from '../lib/imagenes';
+import { ruta, unico } from '../lib/sitio';
+
+interface Props {
+  /** Título de la pestaña. Sin él se usa el de la portada. */
+  titulo?: string;
+  /** Las páginas de servicio (gracias, 404) no deben salir en buscadores. */
+  indexar?: boolean;
+}
+const { titulo, indexar = true } = Astro.props;
+const { data: sitio } = await unico('sitio');
+
+const tituloBase = `${sitio.titulo} | ${sitio.genero} de ${sitio.autor}`;
+const tituloPagina = titulo ? `${titulo} · ${sitio.titulo}` : tituloBase;
+const canonica = new URL(Astro.url.pathname, Astro.site).href;
+
+// Imagen para compartir en redes: la portada, si es una foto (no el SVG provisional).
+const portada = imagen(sitio.portada);
+const social =
+  portada && portada.format !== 'svg'
+    ? await getImage({ src: portada, width: 1200, format: 'jpg' })
+    : undefined;
+const socialUrl = social && new URL(social.src, Astro.site).href;
+
+const datosLibro = {
+  '@context': 'https://schema.org',
+  '@type': 'Book',
+  name: sitio.titulo,
+  author: { '@type': 'Person', name: sitio.autor },
+  publisher: { '@type': 'Organization', name: sitio.editorial },
+  genre: sitio.genero,
+  inLanguage: 'es',
+  description: sitio.descripcion_buscadores,
+  url: new URL(ruta('/'), Astro.site).href,
+  ...(socialUrl && { image: socialUrl }),
+};
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{tituloPagina}</title>
+    <meta name="description" content={sitio.descripcion_buscadores} />
+    <link rel="canonical" href={canonica} />
+    {!indexar && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#111012" />
+    <link rel="icon" href={ruta('/favicon.svg')} type="image/svg+xml" />
+    <link rel="sitemap" href={ruta('/sitemap-index.xml')} />
+
+    <meta property="og:type" content="book" />
+    <meta property="og:site_name" content={sitio.titulo} />
+    <meta property="og:locale" content="es_PR" />
+    <meta property="og:title" content={tituloPagina} />
+    <meta property="og:description" content={sitio.descripcion_buscadores} />
+    <meta property="og:url" content={canonica} />
+    {
+      socialUrl && (
+        <>
+          <meta property="og:image" content={socialUrl} />
+          <meta property="og:image:alt" content={sitio.portada_descripcion} />
+        </>
+      )
+    }
+    <meta name="twitter:card" content={socialUrl ? 'summary_large_image' : 'summary'} />
+
+    {indexar && <script type="application/ld+json" set:html={JSON.stringify(datosLibro)} />}
+  </head>
+  <body>
+    <a class="saltar" href="#contenido">Saltar al contenido</a>
+    <Cabecera titulo={sitio.titulo} />
+    <main id="contenido" tabindex="-1">
+      <slot />
+    </main>
+    <Pie sitio={sitio} />
+  </body>
+</html>
+
+<style>
+  main:focus {
+    outline: none;
+  }
+</style>

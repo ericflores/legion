@@ -1,0 +1,383 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { MOTIVOS, ruta } from '../lib/sitio';
+import Seccion from './Seccion.astro';
+
+interface Props {
+  sitio: CollectionEntry<'sitio'>['data'];
+}
+const { sitio } = Astro.props;
+const { contacto } = sitio;
+const clave = contacto.clave_web3forms;
+const gracias = new URL(ruta('/gracias/'), Astro.site).href;
+
+if (!clave) {
+  console.warn(
+    '\n[contacto] Falta "clave_web3forms" en contenido/sitio.yaml: el formulario no enviará mensajes.\n',
+  );
+}
+---
+
+<Seccion id="contacto" etiqueta={contacto.etiqueta} titular={contacto.titular}>
+  {contacto.texto && <p slot="cabeza" class="contacto__texto">{contacto.texto}</p>}
+
+  <div class="contacto__panel">
+    {
+      !clave && (
+        <p class="aviso" role="note">
+          <strong>Formulario sin configurar.</strong> Falta la clave de Web3Forms en{' '}
+          <code>contenido/sitio.yaml</code>. El README explica cómo obtenerla.
+        </p>
+      )
+    }
+
+    <form
+      class="formulario"
+      action="https://api.web3forms.com/submit"
+      method="POST"
+      data-formulario
+      aria-labelledby="formulario-titulo"
+    >
+      <h3 id="formulario-titulo">Escribe al autor</h3>
+      <p class="formulario__nota">Todos los campos son obligatorios.</p>
+
+      <input type="hidden" name="access_key" value={clave ?? ''} />
+      <input type="hidden" name="from_name" value={`Sitio web de ${sitio.titulo}`} />
+      <input type="hidden" name="subject" value={`${sitio.titulo} · ${MOTIVOS[0]}`} data-asunto={sitio.titulo} />
+      <input type="hidden" name="redirect" value={gracias} />
+      <!-- Trampa para robots: las personas no la ven ni llegan a ella con el teclado -->
+      <input type="checkbox" name="botcheck" class="trampa" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+      <div class="campo">
+        <label for="c-nombre">Tu nombre</label>
+        <input id="c-nombre" name="nombre" type="text" autocomplete="name" required aria-describedby="c-nombre-error" />
+        <p class="campo__error" id="c-nombre-error" data-error="Escribe tu nombre." hidden></p>
+      </div>
+
+      <div class="campo">
+        <label for="c-email">Correo electrónico</label>
+        <input
+          id="c-email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          inputmode="email"
+          autocapitalize="off"
+          spellcheck="false"
+          required
+          aria-describedby="c-email-ayuda c-email-error"
+        />
+        <p class="campo__ayuda" id="c-email-ayuda">El autor te responderá a esta dirección.</p>
+        <p
+          class="campo__error"
+          id="c-email-error"
+          data-error="Escribe tu correo electrónico."
+          data-error-formato="Revisa el correo. Debe tener esta forma: nombre@ejemplo.com"
+          hidden
+        >
+        </p>
+      </div>
+
+      <div class="campo">
+        <label for="c-motivo">Motivo</label>
+        <div class="campo__selector">
+          <select id="c-motivo" name="motivo">
+            {MOTIVOS.map((m) => <option value={m}>{m}</option>)}
+          </select>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="c-mensaje">¿Qué te gustaría saber?</label>
+        <textarea id="c-mensaje" name="mensaje" rows="5" required aria-describedby="c-mensaje-error"></textarea>
+        <p class="campo__error" id="c-mensaje-error" data-error="Escribe tu mensaje." hidden></p>
+      </div>
+
+      <p class="formulario__fallo" data-fallo role="alert" hidden>
+        No se pudo enviar el mensaje. Tu texto sigue aquí: inténtalo de nuevo en unos minutos.
+      </p>
+
+      <button class="boton boton--primario" type="submit" disabled={!clave}>
+        <span data-enviar-texto>Enviar mensaje</span>
+      </button>
+
+      <p class="formulario__privacidad">
+        Tu mensaje llega al correo del autor a través de Web3Forms. Este sitio no guarda tus datos.
+      </p>
+    </form>
+
+    <div class="enviado" data-enviado tabindex="-1" role="status" hidden>
+      <h3>Mensaje enviado</h3>
+      <p>Gracias por escribir. El autor te responderá al correo que indicaste.</p>
+      <button class="boton boton--contorno" type="button" data-otro>Enviar otro mensaje</button>
+    </div>
+  </div>
+</Seccion>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-formulario]');
+  const motivo = document.querySelector<HTMLSelectElement>('#c-motivo');
+
+  // Los enlaces "Pedir información", "Invitar al autor"… traen el motivo ya elegido.
+  document.addEventListener('click', (e) => {
+    const enlace = (e.target as HTMLElement).closest<HTMLElement>('a[data-motivo]');
+    if (enlace && motivo && [...motivo.options].some((o) => o.value === enlace.dataset.motivo)) {
+      motivo.value = enlace.dataset.motivo!;
+    }
+  });
+
+  if (form) {
+    type Campo = HTMLInputElement | HTMLTextAreaElement;
+    const campos = [...form.querySelectorAll<Campo>('input[required], textarea[required]')];
+    const boton = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    const botonTexto = form.querySelector<HTMLElement>('[data-enviar-texto]')!;
+    const fallo = form.querySelector<HTMLElement>('[data-fallo]')!;
+    const enviado = document.querySelector<HTMLElement>('[data-enviado]')!;
+    const asunto = form.querySelector<HTMLInputElement>('input[name="subject"]')!;
+
+    // Con JavaScript los errores se muestran en español y junto a cada campo.
+    form.noValidate = true;
+
+    const validar = (campo: Campo) => {
+      const caja = document.getElementById(`${campo.id}-error`)!;
+      const vacio = campo.value.trim() === '';
+      const mensaje = vacio
+        ? caja.dataset.error
+        : campo.validity.typeMismatch
+          ? caja.dataset.errorFormato
+          : '';
+      caja.textContent = mensaje ?? '';
+      caja.hidden = !mensaje;
+      if (mensaje) campo.setAttribute('aria-invalid', 'true');
+      else campo.removeAttribute('aria-invalid');
+      return !mensaje;
+    };
+
+    for (const campo of campos) {
+      campo.addEventListener('blur', () => {
+        // No se regaña a quien solo pasó por el campo sin escribir.
+        if (campo.value.trim() !== '' || campo.hasAttribute('aria-invalid')) validar(campo);
+      });
+      campo.addEventListener('input', () => {
+        if (campo.hasAttribute('aria-invalid')) validar(campo);
+      });
+    }
+
+    const ocupado = (si: boolean) => {
+      boton.disabled = si;
+      botonTexto.textContent = si ? 'Enviando…' : 'Enviar mensaje';
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (boton.disabled) return;
+
+      const invalidos = campos.filter((c) => !validar(c));
+      if (invalidos.length) {
+        invalidos[0].focus();
+        return;
+      }
+
+      fallo.hidden = true;
+      asunto.value = `${asunto.dataset.asunto} · ${motivo?.value ?? ''}`;
+      const datos = new FormData(form);
+      datos.delete('redirect'); // la redirección es solo para cuando no hay JavaScript
+      ocupado(true);
+
+      try {
+        const respuesta = await fetch(form.action, {
+          method: 'POST',
+          headers: { Accept: 'application/json' },
+          body: datos,
+        });
+        const resultado = await respuesta.json();
+        if (!respuesta.ok || !resultado.success) throw new Error(resultado.message);
+
+        form.reset();
+        form.hidden = true;
+        enviado.hidden = false;
+        enviado.focus();
+      } catch {
+        fallo.hidden = false;
+      } finally {
+        ocupado(false);
+      }
+    });
+
+    enviado.querySelector('[data-otro]')?.addEventListener('click', () => {
+      enviado.hidden = true;
+      form.hidden = false;
+      campos[0]?.focus();
+    });
+  }
+</script>
+
+<style>
+  .contacto__texto {
+    max-width: 34ch;
+    color: var(--texto-suave);
+  }
+
+  .contacto__panel {
+    max-width: 40rem;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    background: var(--superficie);
+    border: 1px solid var(--linea);
+    border-radius: var(--radio);
+  }
+
+  .aviso {
+    margin-bottom: 1.5rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--acento);
+    border-radius: var(--radio);
+    font-size: var(--t-pequeno);
+    color: var(--texto);
+  }
+
+  .aviso code {
+    font-size: 0.9em;
+    color: var(--acento-claro);
+    overflow-wrap: anywhere;
+  }
+
+  .formulario {
+    display: grid;
+    gap: 1.4rem;
+  }
+
+  .formulario__nota {
+    margin-top: -1rem;
+    font-size: var(--t-pequeno);
+    color: var(--texto-suave);
+  }
+
+  .trampa {
+    position: absolute;
+    left: -100vw;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  .campo {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  label {
+    font-size: var(--t-pequeno);
+    font-weight: 600;
+  }
+
+  input:not([type='hidden'], [type='checkbox']),
+  select,
+  textarea {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.7rem 0.9rem;
+    background: var(--fondo);
+    color: var(--texto);
+    border: 1px solid var(--linea-fuerte);
+    border-radius: var(--radio);
+    font: inherit;
+    /* 16 px o más: evita que iOS haga zoom al enfocar */
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  textarea {
+    min-height: 8.5rem;
+    resize: vertical;
+  }
+
+  select {
+    appearance: none;
+    padding-right: 2.75rem;
+    cursor: pointer;
+  }
+
+  .campo__selector {
+    position: relative;
+  }
+
+  .campo__selector::after {
+    content: '';
+    position: absolute;
+    right: 1.1rem;
+    top: 50%;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-right: 1.5px solid var(--texto);
+    border-bottom: 1.5px solid var(--texto);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  input:hover,
+  select:hover,
+  textarea:hover {
+    border-color: var(--texto-suave);
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline-offset: 0;
+    border-color: var(--acento-claro);
+  }
+
+  [aria-invalid='true'] {
+    border-color: var(--error) !important;
+  }
+
+  .campo__ayuda {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--texto-suave);
+  }
+
+  .campo__error,
+  .formulario__fallo {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--error);
+  }
+
+  /* el error no depende solo del color: lleva un signo delante */
+  .campo__error::before,
+  .formulario__fallo::before {
+    content: '⚠ ';
+  }
+
+  .formulario .boton {
+    justify-self: start;
+    min-width: 12rem;
+  }
+
+  .formulario__privacidad {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--texto-suave);
+  }
+
+  .enviado {
+    display: grid;
+    gap: 1rem;
+    justify-items: start;
+  }
+
+  .enviado:focus-visible {
+    outline-offset: 0.75rem;
+  }
+
+  .enviado p {
+    color: var(--texto-suave);
+  }
+
+  @media (max-width: 30rem) {
+    .formulario .boton {
+      width: 100%;
+    }
+  }
+</style>

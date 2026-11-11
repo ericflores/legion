@@ -1,0 +1,23 @@
+# Lugares de venta. Para añadir uno, copia un bloque de tres líneas.
+# "enlace" es opcional: la página web o el mapa de la librería.
+
+etiqueta: Dónde conseguirla
+titular: Encuentra tu ejemplar de Legión.
+nota: También disponible en otras librerías de Puerto Rico.
+
+lista:
+  - nombre: Casa Norberto
+    lugar: Plaza Las Américas, tercer nivel
+    enlace:
+  - nombre: Librería Norberto González
+    lugar: Río Piedras
+    enlace:
+  - nombre: Librería Laberinto
+    lugar:
+    enlace:
+  - nombre: Librería Isla
+    lugar:
+    enlace:
+  - nombre: Libros787
+    lugar:
+    enlace:

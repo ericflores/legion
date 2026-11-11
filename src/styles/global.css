@@ -1,0 +1,298 @@
+/* ------------------------------------------------------------------
+   Identidad visual de Legión.
+   Todo el sitio toma colores, tipografías y medidas de estas variables:
+   para cambiar el aspecto general basta con editar este bloque.
+   ------------------------------------------------------------------ */
+:root {
+  color-scheme: dark;
+
+  /* Color: tomado del sitio original y de la portada del libro */
+  --fondo: #111012;
+  --superficie: #18171a;
+  --superficie-alta: #201f23;
+  --linea: rgb(238 235 229 / 0.14);
+  --linea-solida: #2f2e30; /* la misma línea, sin transparencia */
+  --linea-fuerte: rgb(238 235 229 / 0.42);
+  --texto: #eeebe5;
+  --texto-suave: #b9b4ab; /* 8.9:1 sobre el fondo */
+  --acento: #cbb68f; /* 9.5:1 sobre el fondo */
+  --acento-claro: #e0cfab;
+  --sobre-acento: #0b0b0f;
+  --error: #ffa694;
+
+  /* Tipografía: una serif editorial que dialoga con la portada
+     y una sans muy legible para lectura e interfaz */
+  --fuente-titulos: 'Cormorant Garamond Variable', 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  --fuente-texto: 'Manrope Variable', Manrope, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --t-etiqueta: 0.75rem;
+  --t-pequeno: 0.9375rem;
+  --t-texto: 1.0625rem;
+  --t-destacado: clamp(1.25rem, 1rem + 1vw, 1.5rem);
+  --t-h3: clamp(1.5rem, 1.3rem + 0.8vw, 1.75rem);
+  --t-h2: clamp(2.25rem, 1.5rem + 3.2vw, 3.5rem);
+  --t-h1: clamp(4.25rem, 2rem + 11vw, 9rem);
+
+  /* Forma: esquinas casi rectas, tono sobrio */
+  --radio: 2px;
+
+  /* Espacio */
+  --margen: clamp(1.25rem, 5vw, 3rem);
+  --ancho: 74rem;
+  --seccion: clamp(4.5rem, 3rem + 7vw, 8.5rem);
+  --lectura: 62ch;
+  --alto-cabecera: 4.5rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-padding-top: calc(var(--alto-cabecera) + 1rem);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--fuente-texto);
+  font-size: var(--t-texto);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
+}
+
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+  padding: 0;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--fuente-titulos);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+h2 {
+  font-size: var(--t-h2);
+}
+
+h3 {
+  font-size: var(--t-h3);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+a {
+  color: var(--acento);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  color: var(--acento-claro);
+}
+
+:focus-visible {
+  outline: 2px solid var(--acento-claro);
+  outline-offset: 3px;
+  border-radius: var(--radio);
+}
+
+::selection {
+  background: var(--acento);
+  color: var(--sobre-acento);
+}
+
+/* ---------- Utilidades ---------- */
+
+.contenedor {
+  width: 100%;
+  max-width: calc(var(--ancho) + var(--margen) * 2);
+  margin-inline: auto;
+  padding-inline: var(--margen);
+}
+
+.solo-lectores {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.saltar {
+  position: absolute;
+  left: var(--margen);
+  top: 0.75rem;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  background: var(--acento);
+  color: var(--sobre-acento);
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: var(--radio);
+  transform: translateY(-300%);
+}
+
+.saltar:focus {
+  transform: none;
+  color: var(--sobre-acento);
+}
+
+.etiqueta {
+  font-size: var(--t-etiqueta);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  color: var(--acento);
+}
+
+/* Texto largo salido de Markdown */
+.prosa {
+  max-width: var(--lectura);
+  color: var(--texto-suave);
+}
+
+.prosa > * + * {
+  margin-top: 1.15em;
+}
+
+.prosa em {
+  color: var(--texto);
+}
+
+.prosa strong {
+  color: var(--texto);
+  font-weight: 700;
+}
+
+/* ---------- Botones y enlaces de acción ---------- */
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  min-height: 3rem;
+  padding: 0.7rem 1.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--radio);
+  font: inherit;
+  font-size: var(--t-pequeno);
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.boton--primario {
+  background: var(--acento);
+  color: var(--sobre-acento);
+}
+
+.boton--primario:hover {
+  background: var(--acento-claro);
+  color: var(--sobre-acento);
+}
+
+.boton--contorno {
+  border-color: var(--linea-fuerte);
+  color: var(--texto);
+  background: transparent;
+}
+
+.boton--contorno:hover {
+  border-color: var(--acento);
+  color: var(--acento-claro);
+}
+
+.boton[disabled],
+.boton[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.enlace {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  min-height: 2.75rem;
+  font-size: var(--t-pequeno);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: rgb(203 182 143 / 0.45);
+}
+
+.enlace:hover {
+  text-decoration-color: currentColor;
+}
+
+.flecha {
+  flex: none;
+  width: 0.95em;
+  height: 0.95em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

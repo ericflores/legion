@@ -1,0 +1,61 @@
+# Datos generales del sitio. Cambia el texto a la derecha de los dos puntos.
+
+titulo: Legión
+autor: Efraín A. Flores Acosta
+genero: Suspenso psicológico
+editorial: Publicaciones Gaviota
+
+# Lo primero que se lee al entrar
+lema: Porque a veces, el enemigo no viene de fuera.
+gancho:
+  - Seis testigos lo vieron. Él mismo se vio haciéndolo.
+  - Sin embargo, afirma con total convicción que no fue él.
+frase: Una verdad más perturbadora que la mentira.
+
+# Imagen de la portada (el archivo vive en contenido/imagenes/)
+portada: portada.svg
+portada_descripcion: Portada y contraportada de Legión, de Efraín A. Flores Acosta
+
+# Texto que muestran Google y las redes sociales al compartir el enlace
+descripcion_buscadores: >-
+  Descubre Legión, la novela de suspenso psicológico de Efraín A. Flores
+  Acosta. Conoce su historia, dónde conseguirla y los próximos encuentros
+  con el autor.
+
+personajes:
+  etiqueta: Personajes principales
+  titular: Aliados, secretos y figuras de poder.
+
+banda_sonora:
+  etiqueta: Banda sonora complementaria
+  titular: Escucha la atmósfera de Legión.
+  texto: >-
+    La música está profundamente entrelazada con la atmósfera del texto, con
+    numerosas referencias musicales precisas integradas a lo largo de sus
+    páginas. Acompaña tu lectura con la lista de reproducción oficial de
+    Legión en el canal de YouTube del autor.
+  enlace: https://www.youtube.com/watch?v=1elGqARTb1Q&list=PLbvIremVSQtg
+  enlace_texto: Escuchar la playlist en YouTube
+
+encuentros:
+  etiqueta: Encuentros
+  titular: Ventas especiales itinerantes.
+  sin_fechas: >-
+    Por ahora no hay fechas anunciadas. Escribe al autor si quieres organizar
+    una presentación o una venta en tu librería, club de lectura o comunidad.
+
+interludio:
+  titular: Entre la fe y la duda.
+  texto: >-
+    La lealtad, los secretos y el perdón atraviesan una historia donde la
+    amenaza más profunda puede estar dentro de nosotros.
+
+contacto:
+  etiqueta: Contacto
+  titular: La conversación no termina aquí.
+  texto: >-
+    Ejemplares, encuentros, invitaciones y próximos proyectos. Envía tu
+    consulta al autor.
+  # Clave gratuita de https://web3forms.com (ver README). Sin ella el
+  # formulario no envía mensajes.
+  clave_web3forms: ""

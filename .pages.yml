@@ -1,0 +1,173 @@
+# Configuración de Pages CMS (https://pagescms.org): el editor visual
+# con el que se cambia el contenido sin tocar archivos a mano.
+# Cada bloque de "content" es una pantalla del editor y apunta a un
+# archivo o carpeta de contenido/.
+
+media:
+  input: contenido/imagenes
+  output: /contenido/imagenes
+  categories: [image]
+
+content:
+  - name: sitio
+    label: Datos generales
+    type: file
+    path: contenido/sitio.yaml
+    fields:
+      - { name: titulo, label: Título del libro, type: string, required: true }
+      - { name: autor, label: Autor (nombre corto), type: string, required: true }
+      - { name: genero, label: Género, type: string, required: true }
+      - { name: editorial, label: Editorial, type: string, required: true }
+      - { name: lema, label: Lema bajo el título, type: string, required: true }
+      - name: gancho
+        label: Gancho (una línea por renglón)
+        type: string
+        list: true
+      - { name: frase, label: Frase destacada tras la portada, type: string }
+      - { name: portada, label: Imagen de la portada, type: image, required: true }
+      - { name: portada_descripcion, label: Descripción de la portada (para lectores de pantalla), type: string, required: true }
+      - name: descripcion_buscadores
+        label: Descripción para Google y redes sociales
+        type: text
+        required: true
+        description: Una o dos frases. Es el texto que aparece al compartir el enlace.
+      - name: personajes
+        label: Sección Personajes
+        type: object
+        fields:
+          - { name: etiqueta, label: Etiqueta, type: string, required: true }
+          - { name: titular, label: Titular, type: string, required: true }
+      - name: banda_sonora
+        label: Sección Banda sonora
+        type: object
+        fields:
+          - { name: etiqueta, label: Etiqueta, type: string, required: true }
+          - { name: titular, label: Titular, type: string, required: true }
+          - { name: texto, label: Texto, type: text, required: true }
+          - { name: enlace, label: Enlace a la playlist, type: string }
+          - { name: enlace_texto, label: Texto del botón, type: string }
+      - name: encuentros
+        label: Sección Encuentros
+        type: object
+        fields:
+          - { name: etiqueta, label: Etiqueta, type: string, required: true }
+          - { name: titular, label: Titular, type: string, required: true }
+          - { name: sin_fechas, label: Texto cuando no hay fechas anunciadas, type: text, required: true }
+      - name: interludio
+        label: Frase antes de la sección del autor
+        type: object
+        fields:
+          - { name: titular, label: Titular, type: string }
+          - { name: texto, label: Texto, type: text }
+      - name: contacto
+        label: Sección Contacto
+        type: object
+        fields:
+          - { name: etiqueta, label: Etiqueta, type: string, required: true }
+          - { name: titular, label: Titular, type: string, required: true }
+          - { name: texto, label: Texto, type: text }
+          - name: clave_web3forms
+            label: Clave de Web3Forms
+            type: string
+            description: La clave que Web3Forms envía por correo. Sin ella el formulario no manda mensajes.
+
+  - name: novela
+    label: La novela
+    type: file
+    path: contenido/novela.md
+    fields:
+      - { name: etiqueta, label: Etiqueta, type: string, required: true }
+      - { name: titular, label: Titular, type: string, required: true }
+      - { name: body, label: Sinopsis, type: rich-text, options: { format: markdown } }
+      - { name: cita, label: Cita destacada, type: text }
+
+  - name: universo
+    label: El universo
+    type: file
+    path: contenido/universo.md
+    fields:
+      - { name: etiqueta, label: Etiqueta, type: string, required: true }
+      - { name: titular, label: Titular, type: string, required: true }
+      - { name: body, label: Introducción, type: rich-text, options: { format: markdown } }
+      - name: datos
+        label: Datos (Ambientación, Temas…)
+        type: object
+        list: true
+        fields:
+          - { name: titulo, label: Título, type: string, required: true }
+          - { name: texto, label: Texto, type: text, required: true }
+
+  - name: personajes
+    label: Personajes
+    type: collection
+    path: contenido/personajes
+    filename: '{primary}.md'
+    view:
+      fields: [nombre, rol, orden]
+      primary: nombre
+      sort: [orden]
+      default: { sort: orden, order: asc }
+    fields:
+      - { name: nombre, label: Nombre, type: string, required: true }
+      - { name: rol, label: Rol (una o dos palabras), type: string }
+      - name: orden
+        label: Orden
+        type: number
+        description: Los números bajos salen primero. El 1 se muestra destacado.
+      - { name: body, label: Descripción, type: rich-text, options: { format: markdown } }
+
+  - name: librerias
+    label: Dónde conseguirla
+    type: file
+    path: contenido/librerias.yaml
+    fields:
+      - { name: etiqueta, label: Etiqueta, type: string, required: true }
+      - { name: titular, label: Titular, type: string, required: true }
+      - { name: nota, label: Nota bajo la lista, type: string }
+      - name: lista
+        label: Librerías
+        type: object
+        list: true
+        fields:
+          - { name: nombre, label: Nombre, type: string, required: true }
+          - { name: lugar, label: Lugar, type: string }
+          - { name: enlace, label: Página web o mapa (opcional), type: string }
+
+  - name: encuentros
+    label: Encuentros
+    type: collection
+    path: contenido/encuentros
+    filename: '{fields.fecha}-{primary}.md'
+    view:
+      fields: [titulo, fecha, lugar]
+      primary: titulo
+      sort: [fecha]
+      default: { sort: fecha, order: desc }
+    fields:
+      - { name: titulo, label: Título, type: string, required: true }
+      - name: fecha
+        label: Fecha
+        type: date
+        required: true
+        description: Al pasar la fecha, el encuentro deja de mostrarse solo.
+      - { name: hora, label: Hora, type: string, description: 'Por ejemplo: Desde las 10:00 a. m.' }
+      - { name: lugar, label: Lugar, type: string, required: true }
+      - { name: direccion, label: Dirección, type: string }
+      - name: mapa
+        label: Enlace al mapa (opcional)
+        type: string
+        description: Si se deja vacío, el sitio crea solo un enlace a Google Maps con el lugar y la dirección.
+      - { name: body, label: Detalles (opcional), type: rich-text, options: { format: markdown } }
+
+  - name: autor
+    label: El autor
+    type: file
+    path: contenido/autor.md
+    fields:
+      - { name: etiqueta, label: Etiqueta, type: string, required: true }
+      - { name: nombre, label: Nombre completo, type: string, required: true }
+      - { name: foto, label: Foto, type: image }
+      - { name: foto_descripcion, label: Descripción de la foto (para lectores de pantalla), type: string }
+      - { name: body, label: Biografía, type: rich-text, options: { format: markdown } }
+      - { name: proyectos_titulo, label: Título del bloque de proyectos, type: string }
+      - { name: proyectos_texto, label: Texto del bloque de proyectos, type: text }

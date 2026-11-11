@@ -1,0 +1,66 @@
+---
+import { seccion, unico } from '../lib/sitio';
+import EnlaceExterno from './EnlaceExterno.astro';
+import Seccion from './Seccion.astro';
+
+const { data } = await unico('librerias');
+---
+
+<Seccion id="conseguir" etiqueta={data.etiqueta} titular={data.titular}>
+  {
+    data.lista.length > 0 && (
+      <ul class="librerias" role="list">
+        {data.lista.map((l) => (
+          <li class="libreria">
+            <div>
+              <h3>{l.nombre}</h3>
+              {l.lugar && <p class="libreria__lugar">{l.lugar}</p>}
+            </div>
+            {l.enlace && (
+              <EnlaceExterno href={l.enlace}>
+                Visitar<span class="solo-lectores"> {l.nombre}</span>
+              </EnlaceExterno>
+            )}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+  <p class="librerias__nota">
+    {data.nota}{' '}
+    ¿No la encuentras cerca?{' '}
+    <a href={seccion('contacto')} data-motivo="Conseguir un ejemplar">Pídesela al autor</a>.
+  </p>
+</Seccion>
+
+<style>
+  .librerias {
+    border-top: 1px solid var(--linea-fuerte);
+  }
+
+  .libreria {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem 1.5rem;
+    padding-block: 1.1rem;
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .libreria__lugar {
+    font-size: var(--t-pequeno);
+    color: var(--texto-suave);
+  }
+
+  .librerias__nota {
+    max-width: var(--lectura);
+    margin-top: 1.75rem;
+    font-size: var(--t-pequeno);
+    color: var(--texto-suave);
+  }
+
+  .librerias__nota a {
+    font-weight: 600;
+  }
+</style>

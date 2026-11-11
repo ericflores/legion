@@ -1,0 +1,32 @@
+---
+import Autor from '../components/Autor.astro';
+import BandaSonora from '../components/BandaSonora.astro';
+import Conseguir from '../components/Conseguir.astro';
+import Contacto from '../components/Contacto.astro';
+import Encuentros from '../components/Encuentros.astro';
+import Franja from '../components/Franja.astro';
+import Novela from '../components/Novela.astro';
+import Personajes from '../components/Personajes.astro';
+import Portada from '../components/Portada.astro';
+import Base from '../layouts/Base.astro';
+import { unico } from '../lib/sitio';
+
+const { data: sitio } = await unico('sitio');
+---
+
+<Base>
+  <Portada sitio={sitio} />
+  {sitio.frase && <Franja titular={sitio.frase} />}
+  <Novela />
+  <Personajes etiqueta={sitio.personajes.etiqueta} titular={sitio.personajes.titular} />
+  <BandaSonora datos={sitio.banda_sonora} />
+  <Conseguir />
+  <Encuentros
+    etiqueta={sitio.encuentros.etiqueta}
+    titular={sitio.encuentros.titular}
+    sinFechas={sitio.encuentros.sin_fechas}
+  />
+  {sitio.interludio.titular && <Franja titular={sitio.interludio.titular} texto={sitio.interludio.texto} />}
+  <Autor />
+  <Contacto sitio={sitio} />
+</Base>

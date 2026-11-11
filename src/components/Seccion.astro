@@ -1,0 +1,59 @@
+---
+// Marco común de cada sección: etiqueta dorada + titular a la izquierda,
+// contenido a la derecha (o debajo, con disposicion="apilada").
+interface Props {
+  id: string;
+  etiqueta: string;
+  titular: string;
+  disposicion?: 'dividida' | 'apilada';
+}
+const { id, etiqueta, titular, disposicion = 'dividida' } = Astro.props;
+const idTitular = `${id}-titular`;
+---
+
+<section id={id} class:list={['seccion', `seccion--${disposicion}`]} aria-labelledby={idTitular}>
+  <div class="contenedor seccion__rejilla">
+    <header class="seccion__cabeza">
+      <p class="etiqueta">{etiqueta}</p>
+      <h2 id={idTitular}>{titular}</h2>
+      <slot name="cabeza" />
+    </header>
+    <div class="seccion__cuerpo">
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style>
+  .seccion {
+    padding-block: var(--seccion);
+    border-top: 1px solid var(--linea);
+  }
+
+  .seccion__rejilla {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .seccion__cabeza {
+    display: grid;
+    gap: 1.25rem;
+    align-content: start;
+  }
+
+  .seccion--apilada .seccion__cabeza {
+    max-width: 44rem;
+  }
+
+  @media (min-width: 60rem) {
+    .seccion--dividida .seccion__rejilla {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: clamp(3rem, 7vw, 6rem);
+    }
+
+    .seccion--dividida .seccion__cabeza {
+      position: sticky;
+      top: calc(var(--alto-cabecera) + 2rem);
+    }
+  }
+</style>

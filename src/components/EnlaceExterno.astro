@@ -1,0 +1,17 @@
+---
+// Enlace que sale del sitio: abre en pestaña nueva y lo avisa
+// con la flecha diagonal y un texto para lectores de pantalla.
+import Flecha from './Flecha.astro';
+
+interface Props {
+  href: string;
+  class?: string;
+}
+const { href, class: clase = 'enlace' } = Astro.props;
+---
+
+<a class={clase} href={href} target="_blank" rel="noopener noreferrer">
+  <slot />
+  <Flecha tipo="fuera" />
+  <span class="solo-lectores">(abre en una pestaña nueva)</span>
+</a>

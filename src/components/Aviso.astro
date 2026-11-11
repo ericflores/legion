@@ -1,0 +1,43 @@
+---
+// Página corta de servicio: mensaje centrado y un camino de vuelta.
+import { ruta } from '../lib/sitio';
+
+interface Props {
+  etiqueta: string;
+  titular: string;
+}
+const { etiqueta, titular } = Astro.props;
+---
+
+<section class="aviso-pagina">
+  <div class="contenedor">
+    <p class="etiqueta">{etiqueta}</p>
+    <h1>{titular}</h1>
+    <p class="aviso-pagina__texto"><slot /></p>
+    <a class="boton boton--primario" href={ruta('/')}>Volver al inicio</a>
+  </div>
+</section>
+
+<style>
+  .aviso-pagina {
+    display: grid;
+    align-items: center;
+    min-height: 60vh;
+    padding-block: var(--seccion);
+  }
+
+  .aviso-pagina .contenedor {
+    display: grid;
+    gap: 1.5rem;
+    justify-items: start;
+  }
+
+  h1 {
+    font-size: var(--t-h2);
+  }
+
+  .aviso-pagina__texto {
+    max-width: 46ch;
+    color: var(--texto-suave);
+  }
+</style>

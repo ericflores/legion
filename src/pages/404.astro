@@ -1,0 +1,10 @@
+---
+import Aviso from '../components/Aviso.astro';
+import Base from '../layouts/Base.astro';
+---
+
+<Base titulo="Página no encontrada" indexar={false}>
+  <Aviso etiqueta="Error 404" titular="Esta página no existe.">
+    Puede que el enlace esté mal escrito o que la página haya cambiado de lugar.
+  </Aviso>
+</Base>

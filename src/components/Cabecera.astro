@@ -1,0 +1,251 @@
+---
+import { SECCIONES, ruta, seccion } from '../lib/sitio';
+
+interface Props {
+  titulo: string;
+}
+const { titulo } = Astro.props;
+---
+
+<header class="cabecera">
+  <div class="contenedor cabecera__fila">
+    <a class="marca" href={ruta('/')} aria-label={`${titulo}, inicio`}>{titulo}</a>
+
+    <nav class="navegacion" id="menu" aria-label="Secciones">
+      <ul role="list">
+        {
+          SECCIONES.map((s) => (
+            <li>
+              <a href={seccion(s.id)} data-seccion={s.id}>
+                {s.nombre}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="cabecera__acciones">
+      <a class="boton boton--contorno cabecera__contacto" href={seccion('contacto')} data-seccion="contacto">
+        Contacto
+      </a>
+      <button class="boton boton--contorno menu-boton" type="button" aria-expanded="false" aria-controls="menu" hidden>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true">
+          <path class="menu-boton__abrir" d="M3 7h18M3 12h18M3 17h18"></path>
+          <path class="menu-boton__cerrar" d="M5 5l14 14M19 5 5 19"></path>
+        </svg>
+        Menú
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  const boton = document.querySelector<HTMLButtonElement>('.menu-boton');
+  const menu = document.querySelector<HTMLElement>('#menu');
+
+  if (boton && menu) {
+    // Sin JavaScript el menú queda siempre a la vista; con él, se pliega en móvil.
+    boton.hidden = false;
+    const cerrar = () => boton.setAttribute('aria-expanded', 'false');
+
+    boton.addEventListener('click', () => {
+      const abierto = boton.getAttribute('aria-expanded') === 'true';
+      boton.setAttribute('aria-expanded', String(!abierto));
+    });
+    menu.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a')) cerrar();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && boton.getAttribute('aria-expanded') === 'true') {
+        cerrar();
+        boton.focus();
+      }
+    });
+  }
+
+  // Marca en el menú la sección que se está leyendo. Universo, personajes y
+  // banda sonora forman parte de "La novela" aunque no tengan enlace propio.
+  const PERTENECE: Record<string, string> = {
+    universo: 'novela',
+    personajes: 'novela',
+    'banda-sonora': 'novela',
+  };
+  const enlaces = [...document.querySelectorAll<HTMLAnchorElement>('.cabecera [data-seccion]')];
+  const conEnlace = new Set(enlaces.map((a) => a.dataset.seccion));
+  const destinos = [...document.querySelectorAll<HTMLElement>('main section[id]')].filter((el) =>
+    conEnlace.has(PERTENECE[el.id] ?? el.id),
+  );
+
+  if (destinos.length && 'IntersectionObserver' in window) {
+    const visibles = new Set<string>();
+    const marcar = () => {
+      const visible = destinos.find((d) => visibles.has(d.id))?.id;
+      const actual = visible && (PERTENECE[visible] ?? visible);
+      for (const a of enlaces) {
+        if (a.dataset.seccion === actual) a.setAttribute('aria-current', 'location');
+        else a.removeAttribute('aria-current');
+      }
+    };
+    const observador = new IntersectionObserver(
+      (entradas) => {
+        for (const e of entradas) {
+          if (e.isIntersecting) visibles.add(e.target.id);
+          else visibles.delete(e.target.id);
+        }
+        marcar();
+      },
+      { rootMargin: '-45% 0px -50% 0px' },
+    );
+    destinos.forEach((d) => observador.observe(d));
+  }
+</script>
+
+<style>
+  .cabecera {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgb(17 16 18 / 0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .cabecera__fila {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    column-gap: 1.5rem;
+    min-height: var(--alto-cabecera);
+  }
+
+  .marca {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-family: var(--fuente-titulos);
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--acento);
+  }
+
+  .navegacion ul {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: clamp(1rem, 2.4vw, 2.25rem);
+  }
+
+  .navegacion a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: var(--t-pequeno);
+    font-weight: 500;
+    color: var(--texto-suave);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+
+  .navegacion a:hover {
+    color: var(--texto);
+  }
+
+  .navegacion a[aria-current] {
+    color: var(--texto);
+    border-bottom-color: var(--acento);
+  }
+
+  .cabecera__acciones {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .cabecera__acciones .boton {
+    min-height: 2.75rem;
+    padding-inline: 1.1rem;
+  }
+
+  .cabecera__contacto[aria-current] {
+    border-color: var(--acento);
+    color: var(--acento-claro);
+  }
+
+  .menu-boton__cerrar,
+  .menu-boton[aria-expanded='true'] .menu-boton__abrir {
+    display: none;
+  }
+
+  .menu-boton[aria-expanded='true'] .menu-boton__cerrar {
+    display: inline;
+  }
+
+  /* Escritorio: menú en línea, sin botón */
+  @media (min-width: 62rem) {
+    .menu-boton {
+      display: none;
+    }
+  }
+
+  /* Móvil y tableta: el menú baja a una segunda fila y se pliega */
+  @media (max-width: 61.99rem) {
+    .navegacion {
+      order: 3;
+      flex-basis: 100%;
+    }
+
+    .navegacion ul {
+      flex-direction: column;
+      padding-block: 0.5rem 1rem;
+      border-top: 1px solid var(--linea);
+    }
+
+    .navegacion a {
+      width: 100%;
+      min-height: 3rem;
+      font-size: var(--t-texto);
+    }
+
+    /* Si el botón existe (hay JavaScript), el menú empieza plegado */
+    .cabecera__fila:has(.menu-boton:not([hidden])[aria-expanded='false']) .navegacion {
+      display: none;
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .cabecera__fila {
+      column-gap: 0.75rem;
+    }
+
+    .marca {
+      font-size: 1.3rem;
+      letter-spacing: 0.16em;
+    }
+
+    .cabecera__acciones {
+      gap: 0.5rem;
+    }
+
+    .cabecera__acciones .boton {
+      padding-inline: 0.8rem;
+    }
+  }
+
+  @media (max-width: 22.5rem) {
+    .marca {
+      font-size: 1.2rem;
+      letter-spacing: 0.12em;
+    }
+
+    .cabecera__acciones .boton {
+      padding-inline: 0.65rem;
+    }
+
+    .menu-boton svg {
+      display: none;
+    }
+  }
+</style>

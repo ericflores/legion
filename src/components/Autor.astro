@@ -1,0 +1,119 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import { imagen } from '../lib/imagenes';
+import { seccion, unico } from '../lib/sitio';
+import Flecha from './Flecha.astro';
+
+const autor = await unico('autor');
+const { Content: Biografia } = await render(autor);
+const { data } = autor;
+const foto = imagen(data.foto);
+---
+
+<section id="autor" class:list={['autor', { 'autor--sin-foto': !foto }]} aria-labelledby="autor-titular">
+  <div class="contenedor autor__rejilla">
+    {
+      foto && (
+        <figure class="autor__foto">
+          <Image
+            src={foto}
+            alt={data.foto_descripcion ?? `Retrato de ${data.nombre}`}
+            widths={[360, 640, 960]}
+            sizes="(min-width: 60rem) 30vw, (min-width: 36rem) 22rem, 92vw"
+          />
+        </figure>
+      )
+    }
+    <div class="autor__texto">
+      <p class="etiqueta">{data.etiqueta}</p>
+      <h2 id="autor-titular">{data.nombre}</h2>
+      <div class="prosa">
+        <Biografia />
+      </div>
+
+      {
+        data.proyectos_texto && (
+          <div class="autor__proyectos">
+            <h3>{data.proyectos_titulo ?? 'Futuros proyectos'}</h3>
+            <p>{data.proyectos_texto}</p>
+          </div>
+        )
+      }
+
+      <a class="enlace" href={seccion('contacto')} data-motivo="Futuros proyectos">
+        Escribe al autor
+        <Flecha tipo="abajo" />
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .autor {
+    padding-block: var(--seccion);
+    border-top: 1px solid var(--linea);
+  }
+
+  .autor__rejilla {
+    display: grid;
+    gap: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .autor__foto {
+    width: min(100%, 18rem);
+  }
+
+  .autor__foto img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: center 20%;
+    border-radius: var(--radio);
+    border: 1px solid var(--linea);
+  }
+
+  .autor__texto {
+    display: grid;
+    gap: 1.25rem;
+    justify-items: start;
+    align-content: start;
+  }
+
+  .autor__texto .prosa {
+    margin-top: 0.5rem;
+  }
+
+  .autor__proyectos {
+    display: grid;
+    gap: 0.5rem;
+    max-width: var(--lectura);
+    margin-top: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--linea-fuerte);
+    font-size: var(--t-pequeno);
+    color: var(--texto-suave);
+  }
+
+  .autor__proyectos h3 {
+    color: var(--texto);
+  }
+
+  @media (min-width: 60rem) {
+    .autor__rejilla {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: clamp(3rem, 7vw, 6rem);
+      align-items: start;
+    }
+
+    .autor--sin-foto .autor__rejilla {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .autor__foto {
+      position: sticky;
+      top: calc(var(--alto-cabecera) + 2rem);
+      width: 100%;
+    }
+  }
+</style>

@@ -1,0 +1,100 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { SECCIONES, ruta, seccion } from '../lib/sitio';
+
+interface Props {
+  sitio: CollectionEntry<'sitio'>['data'];
+}
+const { sitio } = Astro.props;
+const anio = new Date().getFullYear();
+---
+
+<footer class="pie">
+  <div class="contenedor pie__rejilla">
+    <div class="pie__marca">
+      <a class="pie__titulo" href={ruta('/')}>{sitio.titulo}</a>
+      <p>{sitio.autor} · {sitio.genero} · {sitio.editorial}</p>
+    </div>
+
+    <nav aria-label="Pie de página">
+      <ul role="list">
+        {
+          SECCIONES.map((s) => (
+            <li>
+              <a href={seccion(s.id)}>{s.nombre}</a>
+            </li>
+          ))
+        }
+        <li><a href={seccion('contacto')}>Contacto</a></li>
+      </ul>
+    </nav>
+
+    <p class="pie__legal">© {anio} {sitio.titulo} · {sitio.autor}</p>
+  </div>
+</footer>
+
+<style>
+  .pie {
+    padding-block: clamp(3rem, 6vw, 4.5rem);
+    border-top: 1px solid var(--linea);
+    font-size: var(--t-pequeno);
+    color: var(--texto-suave);
+  }
+
+  .pie__rejilla {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .pie__marca {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .pie__titulo {
+    justify-self: start;
+    font-family: var(--fuente-titulos);
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    line-height: 1.6;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--acento);
+  }
+
+  .pie ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.75rem;
+  }
+
+  .pie nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--texto-suave);
+    text-decoration: none;
+  }
+
+  .pie nav a:hover {
+    color: var(--texto);
+    text-decoration: underline;
+  }
+
+  .pie__legal {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--linea);
+  }
+
+  @media (min-width: 60rem) {
+    .pie__rejilla {
+      grid-template-columns: 1fr auto;
+      align-items: end;
+    }
+
+    .pie__legal {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

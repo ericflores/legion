@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1132 852" width="1132" height="852">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2a2622"/>
+      <stop offset="1" stop-color="#0c0b0d"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(346 26)">
+    <rect width="440" height="800" rx="4" fill="url(#g)" stroke="#cbb68f" stroke-opacity=".35"/>
+    <rect x="0" width="22" height="800" fill="#000" opacity=".35"/>
+    <text x="231" y="200" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="92" letter-spacing="6" fill="#cbb68f">LEGIÓN</text>
+    <text x="231" y="262" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" font-style="italic" fill="#cbb68f" opacity=".8">Imagen provisional de la portada</text>
+    <text x="231" y="740" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="22" letter-spacing="5" fill="#cbb68f" opacity=".8">EFRAÍN A. FLORES ACOSTA</text>
+  </g>
+</svg>

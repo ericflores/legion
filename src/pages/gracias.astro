@@ -1,0 +1,11 @@
+---
+// A esta página llega quien envía el formulario sin JavaScript.
+import Aviso from '../components/Aviso.astro';
+import Base from '../layouts/Base.astro';
+---
+
+<Base titulo="Mensaje enviado" indexar={false}>
+  <Aviso etiqueta="Contacto" titular="Mensaje enviado.">
+    Gracias por escribir. El autor te responderá al correo que indicaste.
+  </Aviso>
+</Base>

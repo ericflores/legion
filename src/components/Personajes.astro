@@ -1,0 +1,93 @@
+---
+import { getCollection, render } from 'astro:content';
+import Seccion from './Seccion.astro';
+
+interface Props {
+  etiqueta: string;
+  titular: string;
+}
+const { etiqueta, titular } = Astro.props;
+
+const personajes = (await getCollection('personajes')).sort(
+  (a, b) => a.data.orden - b.data.orden || a.data.nombre.localeCompare(b.data.nombre, 'es'),
+);
+const fichas = await Promise.all(
+  personajes.map(async (p) => ({ ...p.data, Descripcion: (await render(p)).Content })),
+);
+---
+
+{
+  fichas.length > 0 && (
+    <Seccion id="personajes" etiqueta={etiqueta} titular={titular} disposicion="apilada">
+      <ul class="personajes" role="list">
+        {fichas.map((p) => (
+          <li class="personaje">
+            <h3>{p.nombre}</h3>
+            {p.rol && <p class="personaje__rol">{p.rol}</p>}
+            <div class="personaje__texto">
+              <p.Descripcion />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Seccion>
+  )
+}
+
+<style>
+  .personajes {
+    display: grid;
+    gap: 1px;
+    padding: 1px;
+  }
+
+  .personaje {
+    display: grid;
+    align-content: start;
+    gap: 0.5rem;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    /* contorno de 1px que se solapa con el de la ficha vecina */
+    box-shadow: 0 0 0 1px var(--linea-solida);
+  }
+
+  .personaje__rol {
+    font-size: var(--t-etiqueta);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--acento);
+  }
+
+  .personaje__texto {
+    margin-top: 0.5rem;
+    font-size: var(--t-pequeno);
+    color: var(--texto-suave);
+  }
+
+  @media (min-width: 42rem) {
+    .personajes {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    /* el protagonista (primero en orden) ocupa la fila completa */
+    .personaje:first-child {
+      grid-column: 1 / -1;
+      background: var(--superficie);
+    }
+
+    .personaje:first-child h3 {
+      font-size: clamp(1.75rem, 1.4rem + 1.4vw, 2.25rem);
+    }
+
+    .personaje:first-child .personaje__texto {
+      max-width: var(--lectura);
+      font-size: var(--t-texto);
+    }
+  }
+
+  @media (min-width: 68rem) {
+    .personajes {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>
