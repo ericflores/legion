@@ -48,10 +48,16 @@ const medidas = portada
           Dónde conseguirla
           <Flecha tipo="diagonal" />
         </a>
-        <a class="enlace" href={seccion('novela')}>
-          Conoce la historia
-          <Flecha tipo="abajo" />
-        </a>
+        <p class="portada__enlaces">
+          <a class="enlace" href={seccion('novela')}>
+            Conoce la historia
+            <Flecha tipo="abajo" />
+          </a>
+          <a class="enlace" href={seccion('resenas')}>
+            Reseñas
+            <Flecha tipo="abajo" />
+          </a>
+        </p>
       </div>
       <p class="portada__ficha">
         <span>{sitio.genero}</span>
@@ -464,6 +470,12 @@ const medidas = portada
     justify-items: start;
     width: 100%;
     margin-top: 0.75rem;
+  }
+
+  .portada__enlaces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 1.75rem;
   }
 
   .portada__ficha {
