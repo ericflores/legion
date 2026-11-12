@@ -114,6 +114,13 @@ const resenas = await Promise.all(
     border-bottom: 1px solid var(--linea);
   }
 
+  /* la línea solo separa una reseña de la siguiente: tras la última sobraría,
+     porque enseguida viene la que abre la sección de abajo */
+  .resena:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
   .resena__extracto {
     margin-bottom: 0.75rem;
     padding-left: 1.25rem;
