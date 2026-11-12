@@ -17,7 +17,9 @@ interface Props {
   /** Las páginas de servicio (gracias, 404) no deben salir en buscadores. */
   indexar?: boolean;
 }
-const { titulo, indexar = true } = Astro.props;
+const { titulo, indexar: pideIndexar = true } = Astro.props;
+// El sitio de pruebas (rama dev) nunca se ofrece a los buscadores
+const indexar = pideIndexar && !process.env.SITIO_DE_PRUEBAS;
 const { data: sitio } = await unico('sitio');
 
 const tituloBase = `${sitio.titulo} | ${sitio.genero} de ${sitio.autor}`;

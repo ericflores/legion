@@ -1,0 +1,64 @@
+# Sitio de pruebas: publica la rama "dev" en https://dev.legion.fans para
+# revisar cambios antes de pasarlos a la rama principal.
+#
+# El resultado se sube al repositorio hermano "<este repositorio>-dev", que
+# es quien lo sirve con GitHub Pages (un repositorio solo puede servir un
+# sitio). Requisitos, una sola vez:
+#   - ese repositorio, con Pages en "Deploy from a branch" (main) y el
+#     dominio dev.legion.fans;
+#   - una clave de despliegue con permiso de escritura en él, cuya mitad
+#     privada está aquí en el secreto CLAVE_SITIO_DE_PRUEBAS.
+name: Publicar sitio de pruebas
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pruebas
+  cancel-in-progress: true
+
+env:
+  DOMINIO: dev.legion.fans
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: dev
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Compilar
+        run: npm run build
+        env:
+          SITE: https://${{ env.DOMINIO }}
+          BASE: /
+          # sin esto el sitio de pruebas competiría en Google con el de verdad
+          SITIO_DE_PRUEBAS: '1'
+      - name: Subir al repositorio del sitio de pruebas
+        env:
+          CLAVE: ${{ secrets.CLAVE_SITIO_DE_PRUEBAS }}
+          DESTINO: git@github.com:${{ github.repository }}-dev.git
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$CLAVE" > ~/.ssh/pruebas
+          chmod 600 ~/.ssh/pruebas
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+          cd dist
+          echo "$DOMINIO" > CNAME
+          touch .nojekyll
+          git init -q -b main
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Sitio de pruebas: ${GITHUB_SHA::7}"
+          GIT_SSH_COMMAND='ssh -i ~/.ssh/pruebas -o IdentitiesOnly=yes' git push -q -f "$DESTINO" main

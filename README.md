@@ -136,6 +136,14 @@ npm run check    # revisa tipos y contenido
 npm run build    # genera el sitio en dist/
 ```
 
+### Probar cambios antes de publicarlos
+
+Lo que se sube a la rama `dev` se publica en https://dev.legion.fans, un
+sitio de pruebas que los buscadores no indexan. Cuando el cambio convence,
+se pasa a `main` (un *merge* o un *pull request*) y sale en el sitio de
+verdad. Los detalles están al principio de
+`.github/workflows/publicar-dev.yml`.
+
 ### Dónde está cada cosa
 
 - `contenido/` — textos e imágenes. Su forma se valida en
