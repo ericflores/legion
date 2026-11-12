@@ -49,6 +49,12 @@ content:
           - { name: texto, label: Texto, type: text, required: true }
           - { name: enlace, label: Enlace a la playlist, type: string }
           - { name: enlace_texto, label: Texto del botón, type: string }
+      - name: resenas
+        label: Sección Reseñas
+        type: object
+        fields:
+          - { name: etiqueta, label: Etiqueta, type: string, required: true }
+          - { name: titular, label: Titular, type: string, required: true }
       - name: encuentros
         label: Sección Encuentros
         type: object
@@ -181,6 +187,35 @@ content:
           - { name: telefono, label: Teléfono, type: string, description: 'Con guiones: 787-555-1234' }
           - { name: correo, label: Correo electrónico, type: string }
           - { name: enlace, label: Página web (o Facebook o Instagram si no tiene), type: string }
+
+  - name: resenas
+    label: Reseñas
+    type: collection
+    path: contenido/resenas
+    filename: '{fields.fecha}-{primary}.md'
+    view:
+      fields: [titulo, autor, fecha]
+      primary: titulo
+      sort: [fecha]
+      default: { sort: fecha, order: desc }
+    fields:
+      - { name: titulo, label: Título, type: string, required: true }
+      - { name: autor, label: Autor de la reseña, type: string, required: true }
+      - name: fecha
+        label: Fecha
+        type: date
+        required: true
+        description: Las más recientes salen primero.
+      - name: extracto
+        label: Extracto destacado
+        type: text
+        required: true
+        description: Una o dos frases, las de más impacto. Es lo que se ve en la página; el texto completo se abre al tocar el título.
+      - name: nota
+        label: Nota (opcional)
+        type: text
+        description: 'De dónde sale el texto. Por ejemplo: "Leída en la presentación del libro. Editada para brevedad."'
+      - { name: body, label: Texto completo, type: rich-text, options: { format: markdown } }
 
   - name: encuentros
     label: Encuentros

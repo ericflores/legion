@@ -27,6 +27,9 @@ banda_sonora:
     en el canal de YouTube del autor.
   enlace: https://www.youtube.com/watch?v=1elGqARTb1Q&list=PLbvIremVSQtg
   enlace_texto: Escuchar la playlist en YouTube
+resenas:
+  etiqueta: Reseñas
+  titular: Lo que se ha dicho de Legión.
 encuentros:
   etiqueta: Encuentros
   titular: Ventas especiales itinerantes.

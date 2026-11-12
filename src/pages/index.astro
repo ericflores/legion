@@ -7,6 +7,7 @@ import Encuentros from '../components/Encuentros.astro';
 import Novela from '../components/Novela.astro';
 import Personajes from '../components/Personajes.astro';
 import Portada from '../components/Portada.astro';
+import Resenas from '../components/Resenas.astro';
 import Base from '../layouts/Base.astro';
 import { unico } from '../lib/sitio';
 
@@ -19,6 +20,7 @@ const { data: sitio } = await unico('sitio');
   <Personajes etiqueta={sitio.personajes.etiqueta} titular={sitio.personajes.titular} />
   <BandaSonora datos={sitio.banda_sonora} />
   <Conseguir />
+  <Resenas etiqueta={sitio.resenas.etiqueta} titular={sitio.resenas.titular} />
   <Encuentros
     etiqueta={sitio.encuentros.etiqueta}
     titular={sitio.encuentros.titular}

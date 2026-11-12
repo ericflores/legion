@@ -40,6 +40,7 @@ const sitio = defineCollection({
       enlace: opcional(enlace),
       enlace_texto: texto.default('Escuchar la playlist'),
     }),
+    resenas: z.object(encabezado).default({ etiqueta: 'Reseñas', titular: 'Lo que se ha dicho de Legión.' }),
     encuentros: z.object({ ...encabezado, sin_fechas: texto }),
     interludio: z.object({ titular: opcional(texto), texto: opcional(texto) }),
     contacto: z.object({
@@ -123,6 +124,17 @@ const canciones = defineCollection({
   }),
 });
 
+const resenas = defineCollection({
+  loader: glob({ pattern: '*.md', base: './contenido/resenas' }),
+  schema: z.object({
+    titulo: texto,
+    autor: texto,
+    fecha: z.coerce.date(),
+    extracto: texto,
+    nota: opcional(texto),
+  }),
+});
+
 const personajes = defineCollection({
   loader: glob({ pattern: '*.md', base: './contenido/personajes' }),
   schema: z.object({
@@ -152,4 +164,4 @@ const encuentros = defineCollection({
   }),
 });
 
-export const collections = { sitio, novela, universo, autor, librerias, directorio, canciones, personajes, encuentros };
+export const collections = { sitio, novela, universo, autor, librerias, directorio, canciones, personajes, resenas, encuentros };

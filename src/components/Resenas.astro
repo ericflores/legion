@@ -1,0 +1,227 @@
+---
+// Reseñas: de cada una se ve el extracto de más impacto; el texto completo
+// se abre en una ventana al tocar el título.
+import { getCollection, render } from 'astro:content';
+import Flecha from './Flecha.astro';
+import Seccion from './Seccion.astro';
+
+interface Props {
+  etiqueta: string;
+  titular: string;
+}
+const { etiqueta, titular } = Astro.props;
+
+// Las fechas del contenido son días de calendario: se leen en UTC para que
+// "2026-11-07" sea siempre el 7.
+const fechaLarga = (f: Date) =>
+  new Intl.DateTimeFormat('es-PR', { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' }).format(f);
+
+const resenas = await Promise.all(
+  (await getCollection('resenas'))
+    .sort((a, b) => b.data.fecha.getTime() - a.data.fecha.getTime())
+    .map(async (r) => ({
+      ...r.data,
+      clave: `resena-${r.id}`,
+      iso: r.data.fecha.toISOString().slice(0, 10),
+      fechaLarga: fechaLarga(r.data.fecha),
+      Texto: (await render(r)).Content,
+    })),
+);
+---
+
+{
+  resenas.length > 0 && (
+    <Seccion id="resenas" etiqueta={etiqueta} titular={titular}>
+      <ul class="resenas" role="list">
+        {resenas.map((r) => (
+          <li class="resena">
+            <blockquote class="resena__extracto">
+              <p>{r.extracto}</p>
+            </blockquote>
+            <h3>
+              <button class="resena__abrir" type="button" data-abre={r.clave} aria-haspopup="dialog">
+                {r.titulo}
+              </button>
+            </h3>
+            <p class="resena__firma">
+              {r.autor}
+              <span aria-hidden="true"> · </span>
+              <time datetime={r.iso}>{r.fechaLarga}</time>
+            </p>
+            <button class="enlace resena__leer" type="button" data-abre={r.clave} aria-haspopup="dialog">
+              Leer la reseña<span class="solo-lectores">: {r.titulo}</span>
+              <Flecha tipo="derecha" />
+            </button>
+
+            <dialog class="lectura" id={r.clave} aria-labelledby={`${r.clave}-titulo`}>
+              <article class="lectura__hoja">
+                <header class="lectura__cabeza">
+                  <p class="etiqueta">Reseña</p>
+                  <h3 id={`${r.clave}-titulo`}>{r.titulo}</h3>
+                  <p class="resena__firma">
+                    {r.autor}
+                    <span aria-hidden="true"> · </span>
+                    <time datetime={r.iso}>{r.fechaLarga}</time>
+                  </p>
+                  {r.nota && <p class="lectura__nota">{r.nota}</p>}
+                </header>
+                <div class="prosa lectura__texto">
+                  <r.Texto />
+                </div>
+                <form method="dialog" class="lectura__pie">
+                  <button class="boton boton--contorno" type="submit">
+                    Cerrar
+                  </button>
+                </form>
+              </article>
+            </dialog>
+          </li>
+        ))}
+      </ul>
+    </Seccion>
+  )
+}
+
+<script>
+  for (const boton of document.querySelectorAll<HTMLButtonElement>('[data-abre]')) {
+    const ventana = document.getElementById(boton.dataset.abre ?? '');
+    if (!(ventana instanceof HTMLDialogElement) || typeof ventana.showModal !== 'function') continue;
+    boton.addEventListener('click', () => {
+      ventana.showModal();
+      ventana.scrollTop = 0;
+    });
+  }
+
+  // tocar fuera de la hoja cierra la ventana; dentro se puede leer y seleccionar
+  for (const ventana of document.querySelectorAll<HTMLDialogElement>('dialog.lectura')) {
+    ventana.addEventListener('click', (evento) => {
+      if (evento.target === ventana) ventana.close();
+    });
+  }
+</script>
+
+<style>
+  .resenas {
+    display: grid;
+    border-top: 1px solid var(--linea-fuerte);
+  }
+
+  .resena {
+    display: grid;
+    justify-items: start;
+    gap: 0.6rem;
+    padding-block: clamp(1.75rem, 4cqi, 2.5rem);
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .resena__extracto {
+    margin-bottom: 0.75rem;
+    padding-left: 1.25rem;
+    border-left: 2px solid var(--acento);
+  }
+
+  .resena__extracto p {
+    font-family: var(--fuente-titulos);
+    font-size: clamp(1.35rem, 1.1rem + 2.2cqi, 1.85rem);
+    font-style: italic;
+    line-height: 1.3;
+    color: var(--texto);
+    text-wrap: balance;
+  }
+
+  /* comillas tipográficas: son adorno, la cita ya va en un blockquote */
+  .resena__extracto p::before {
+    content: '«';
+  }
+
+  .resena__extracto p::after {
+    content: '»';
+  }
+
+  /* el título es el botón que abre la reseña */
+  .resena__abrir {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    text-decoration: underline;
+    text-decoration-color: rgb(203 182 143 / 0.45);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    cursor: pointer;
+    transition: text-decoration-color 0.2s;
+  }
+
+  .resena__abrir:hover {
+    text-decoration-color: var(--acento);
+  }
+
+  .resena__firma {
+    font-size: var(--t-pequeno);
+    font-weight: 500;
+    color: var(--texto-suave);
+  }
+
+  .resena__leer {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: inherit;
+    color: var(--acento);
+    cursor: pointer;
+  }
+
+  /* ---- La ventana de lectura ---- */
+
+  .lectura {
+    width: min(100vw - 2rem, 44rem);
+    max-height: calc(100dvh - 2rem);
+    padding: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--lomo);
+    background: var(--superficie);
+    color: var(--texto);
+  }
+
+  .lectura::backdrop {
+    background: rgb(8 8 10 / 0.86);
+  }
+
+  .lectura__hoja {
+    display: grid;
+    gap: 1.75rem;
+    padding: clamp(1.5rem, 5vw, 3rem);
+  }
+
+  .lectura__cabeza {
+    display: grid;
+    gap: 0.6rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .lectura__cabeza h3 {
+    font-size: clamp(1.75rem, 1.3rem + 2vw, 2.4rem);
+    font-weight: 500;
+    line-height: 1.12;
+  }
+
+  .lectura__nota {
+    margin-top: 0.5rem;
+    font-size: var(--t-pequeno);
+    font-style: italic;
+    color: var(--texto-suave);
+  }
+
+  .lectura__texto {
+    font-size: var(--t-texto);
+    line-height: 1.75;
+  }
+
+  .lectura__pie {
+    padding-top: 0.5rem;
+  }
+</style>

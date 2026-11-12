@@ -20,6 +20,7 @@ export const seccion = (id: string) => `${ruta('/')}#${id}`;
 export const SECCIONES = [
   { id: 'novela', nombre: 'La novela' },
   { id: 'conseguir', nombre: 'Dónde conseguirla' },
+  { id: 'resenas', nombre: 'Reseñas' },
   { id: 'encuentros', nombre: 'Encuentros' },
   { id: 'autor', nombre: 'El autor' },
 ] as const;

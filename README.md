@@ -74,6 +74,14 @@ Aquí puede ir un párrafo opcional con más detalles.
   comprueba la fecha al abrirse, así que las tarjetas aparecen y
   desaparecen el día exacto sin que nadie haga nada.
 
+### Añadir una reseña
+
+En el editor, **Reseñas → Añadir**. Cada reseña lleva título, autor, fecha,
+un **extracto destacado** (una o dos frases, lo que se ve en la página) y el
+texto completo, que se abre en una ventana al tocar el título. La nota es
+opcional: sirve para decir de dónde sale el texto. Las más recientes salen
+primero.
+
 ### Poner o cambiar la cara de un personaje
 
 Cada personaje puede llevar una foto (campo **Foto** en el editor, o `foto:`
