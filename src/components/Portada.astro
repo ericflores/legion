@@ -63,6 +63,7 @@ const medidas = portada
         <span>{sitio.genero}</span>
         <span class="portada__punto" aria-hidden="true"> · </span>
         <span>{sitio.editorial}</span>
+        {sitio.isbn && <span class="portada__isbn">ISBN {sitio.isbn}</span>}
       </p>
     </div>
 
@@ -485,6 +486,14 @@ const medidas = portada
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--texto-suave);
+  }
+
+  /* el ISBN siempre en su propia línea, más discreto */
+  .portada__isbn {
+    display: block;
+    margin-top: 0.35rem;
+    letter-spacing: 0.12em;
+    font-variant-numeric: tabular-nums;
   }
 
   /* Si género y editorial no caben en una línea, van una bajo la otra

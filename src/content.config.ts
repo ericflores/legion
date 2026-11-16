@@ -15,6 +15,12 @@ const enlace = z.url({ protocol: /^https?$/ });
 
 const encabezado = { etiqueta: texto, titular: texto };
 
+// ISBN: se acepta con o sin guiones, y también si el editor lo escribe como número.
+const isbn = z
+  .union([z.string(), z.number()])
+  .transform((v) => String(v).replace(/[-\s]/g, ''))
+  .pipe(z.string().regex(/^(\d{10}|\d{13})$/, 'El ISBN tiene 10 o 13 números (los guiones sobran).'));
+
 const unArchivo = (nombre: string) => glob({ pattern: nombre, base: './contenido' });
 
 const sitio = defineCollection({
@@ -24,6 +30,7 @@ const sitio = defineCollection({
     autor: texto,
     genero: texto,
     editorial: texto,
+    isbn: opcional(isbn),
     // una línea o varias: cada línea de la lista se muestra en su renglón
     lema: z
       .union([texto, z.array(texto).min(1)])

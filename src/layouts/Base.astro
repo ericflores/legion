@@ -21,6 +21,7 @@ const { titulo, indexar: pideIndexar = true } = Astro.props;
 // El sitio de pruebas (rama dev) nunca se ofrece a los buscadores
 const indexar = pideIndexar && !process.env.SITIO_DE_PRUEBAS;
 const { data: sitio } = await unico('sitio');
+const { data: tiendas } = await unico('librerias');
 
 const tituloBase = `${sitio.titulo} | ${sitio.genero} de ${sitio.autor}`;
 const tituloPagina = titulo ? `${titulo} · ${sitio.titulo}` : tituloBase;
@@ -42,6 +43,10 @@ const datosLibro = {
   publisher: { '@type': 'Organization', name: sitio.editorial },
   genre: sitio.genero,
   inLanguage: 'es',
+  datePublished: '2026',
+  ...(sitio.isbn && { isbn: sitio.isbn }),
+  // la página del libro en cada tienda en línea que lo tiene
+  sameAs: tiendas.lista.map((t) => t.enlace).filter(Boolean),
   description: sitio.descripcion_buscadores,
   url: new URL(ruta('/'), Astro.site).href,
   ...(socialUrl && { image: socialUrl }),
