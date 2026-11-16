@@ -11,6 +11,8 @@ export default defineConfig({
   site,
   base,
   trailingSlash: 'always',
+  // Direcciones del sitio anterior que todavía circulan: llevan a la portada
+  redirects: { '/home': base.endsWith('/') ? base : `${base}/` },
   // La página de agradecimiento del formulario no va al mapa del sitio
   integrations: [sitemap({ filter: (pagina) => !pagina.includes('/gracias/') })],
 });
