@@ -11,7 +11,8 @@ export default defineConfig({
   site,
   base,
   trailingSlash: 'always',
-  // Direcciones del sitio anterior que todavía circulan: llevan a la portada
+  // /home es una dirección de quien tenía este dominio antes y que Google aún
+  // recuerda: en vez de un 404, lleva a la portada
   redirects: { '/home': base.endsWith('/') ? base : `${base}/` },
   // La página de agradecimiento del formulario no va al mapa del sitio
   integrations: [sitemap({ filter: (pagina) => !pagina.includes('/gracias/') })],
